@@ -617,7 +617,6 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
             </div>
         </div>
     </div>
-    </div>
 
     <!-- ─── MODAL 6: In-Browser Interactive File Preview Modal (No Download Required) ─── -->
     <div id="file-preview-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in" role="dialog" aria-modal="true">
@@ -762,13 +761,13 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                                   '</div>' +
                                   '</div>' +
                                   '<div class="flex items-center gap-1 shrink-0">' +
-                                  '<button type="button" onclick="openFilePreviewModal(\'/api/elms.php?action=view_material&id=' + m.id + '&inline=1\', \'' + m.file_name.replace(/'/g, &quot;\\'&quot;) + '\', \'' + m.type + '\', \'' + m.size + '\')" class="p-1.5 rounded-lg border border-primary/30 bg-primary/10 hover:bg-primary hover:text-white text-primary transition-colors inline-flex items-center cursor-pointer" title="View Handout in Browser">' +
+                                  '<button type="button" onclick="openFilePreviewModal(\'/api/elms.php?action=view_material&id=' + m.id + '&inline=1\', \'' + (m.file_name || m.title || '').replace(/'/g, "\\'") + '\', \'' + m.type + '\', \'' + m.size + '\')" class="p-1.5 rounded-lg border border-primary/30 bg-primary/10 hover:bg-primary hover:text-white text-primary transition-colors inline-flex items-center cursor-pointer" title="View Handout in Browser">' +
                                   '<span class="material-symbols-outlined text-[15px]">visibility</span>' +
                                   '</button>' +
                                   '<a href="/api/elms.php?action=download_material&id=' + m.id + '" target="_blank" class="p-1.5 rounded-lg border border-outline-variant bg-surface hover:bg-primary hover:text-white text-primary transition-colors inline-flex items-center" title="Download Handout">' +
                                   '<span class="material-symbols-outlined text-[15px]">download</span>' +
                                   '</a>' +
-                                  '<button type="button" onclick="deleteModule(' + m.id + ', \'' + m.title.replace(/'/g, "\\'") + '\')" class="p-1.5 rounded-lg border border-red-500/20 bg-surface hover:bg-red-500 hover:text-white text-red-500 transition-colors inline-flex items-center cursor-pointer" title="Delete Handout">' +
+                                  '<button type="button" onclick="deleteModule(' + m.id + ', \'' + (m.title || '').replace(/'/g, "\\'") + '\')" class="p-1.5 rounded-lg border border-red-500/20 bg-surface hover:bg-red-500 hover:text-white text-red-500 transition-colors inline-flex items-center cursor-pointer" title="Delete Handout">' +
                                   '<span class="material-symbols-outlined text-[15px]">delete</span>' +
                                   '</button>' +
                                   '</div>' +
@@ -797,7 +796,7 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                                   '</div>' +
                                   '<p class="text-[11px] text-on-surface-variant italic truncate mb-2.5">Topic: ' + (c.live_session.topic || 'Live Virtual Class') + '</p>' +
                                   '<div class="flex items-center gap-2">' +
-                                  '<button type="button" onclick="openLiveClassControlPanel(\'' + c.code + '\', \'' + c.title.replace(/'/g, &quot;\\'&quot;) + '\', \'' + c.section + '\', ' + JSON.stringify(c.live_session || {}).replace(/"/g, '&quot;') + ', \'' + (c.id || '') + '\')" class="flex-1 py-2 rounded-xl bg-red-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:opacity-90 transition-all shadow-sm cursor-pointer">' +
+                                  '<button type="button" onclick="openLiveClassControlPanelByCourse(\'' + (c.id || c.code) + '\')" class="flex-1 py-2 rounded-xl bg-red-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:opacity-90 transition-all shadow-sm cursor-pointer">' +
                                   '<span class="material-symbols-outlined text-[16px]">settings_input_component</span> Class Control Panel' +
                                   '</button>' +
                                   '<button type="button" onclick="toggleLiveClass(\'' + c.code + '\', \'end\', \'' + c.section + '\', \'' + (c.id || '') + '\')" class="px-3 py-2 rounded-xl border border-red-500/30 text-red-600 dark:text-red-400 bg-surface hover:bg-red-500/10 font-bold text-xs transition-colors cursor-pointer inline-flex items-center gap-1">' +
@@ -807,7 +806,7 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                                   '</div>';
                 } else {
                     liveBoxHtml = '<div class="mt-4">' +
-                                  '<button type="button" onclick="openStartLiveModal(\'' + c.code + '\', \'' + c.title.replace(/'/g, &quot;\\'&quot;) + '\', \'' + c.section + '\', \'' + (c.id || '') + '\')" class="w-full py-2 rounded-xl border border-red-500/40 bg-red-500/5 hover:bg-red-500/15 text-red-600 dark:text-red-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">' +
+                                  '<button type="button" onclick="openStartLiveModalByCourse(\'' + (c.id || c.code) + '\')" class="w-full py-2 rounded-xl border border-red-500/40 bg-red-500/5 hover:bg-red-500/15 text-red-600 dark:text-red-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">' +
                                   '<span class="material-symbols-outlined text-[16px]">video_call</span> 🔴 Start Live Virtual Class (Sec ' + c.section + ')' +
                                   '</button>' +
                                   '</div>';
@@ -916,7 +915,7 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                                           '<span class="text-[9px] font-mono text-on-surface-variant shrink-0">(' + (f.file_size || 'file') + ')</span>' +
                                           '</div>' +
                                           '<div class="flex items-center gap-1 shrink-0">' +
-                                          '<button type="button" onclick="openFilePreviewModal(\'/api/elms.php?action=view_submission&id=' + s.id + '&file_idx=' + idx + '&inline=1\', \'' + f.file_name.replace(/'/g, &quot;\\'&quot;) + '\', \'' + (f.file_type || '') + '\', \'' + (f.file_size || '') + '\')" class="px-2 py-0.5 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold text-[10px] transition-colors inline-flex items-center gap-0.5 cursor-pointer" title="View inside Browser">' +
+                                          '<button type="button" onclick="openFilePreviewModal(\'/api/elms.php?action=view_submission&id=' + s.id + '&file_idx=' + idx + '&inline=1\', \'' + (f.file_name || 'Proof').replace(/'/g, "\\'") + '\', \'' + (f.file_type || '') + '\', \'' + (f.file_size || '') + '\')" class="px-2 py-0.5 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold text-[10px] transition-colors inline-flex items-center gap-0.5 cursor-pointer" title="View inside Browser">' +
                                           '<span class="material-symbols-outlined text-[13px]">visibility</span> View' +
                                           '</button>' +
                                           '<a href="/api/elms.php?action=download_submission&id=' + s.id + '&file_idx=' + idx + '" target="_blank" class="p-1 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors inline-flex items-center" title="Download">' +
@@ -1023,7 +1022,7 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                              '<span class="text-[10px] font-mono text-on-surface-variant shrink-0">(' + (f.file_size || '') + ')</span>' +
                              '</div>' +
                              '<div class="flex items-center gap-1.5 shrink-0">' +
-                             '<button type="button" onclick="openFilePreviewModal(\'/api/elms.php?action=view_submission&id=' + subId + '&file_idx=' + idx + '&inline=1\', \'' + f.file_name.replace(/'/g, &quot;\\'&quot;) + '\', \'' + (f.file_type || '') + '\', \'' + (f.file_size || '') + '\')" class="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold text-xs transition-colors inline-flex items-center gap-1 cursor-pointer">' +
+                             '<button type="button" onclick="openFilePreviewModal(\'/api/elms.php?action=view_submission&id=' + subId + '&file_idx=' + idx + '&inline=1\', \'' + (f.file_name || 'Proof').replace(/'/g, "\\'") + '\', \'' + (f.file_type || '') + '\', \'' + (f.file_size || '') + '\')" class="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold text-xs transition-colors inline-flex items-center gap-1 cursor-pointer">' +
                              '<span class="material-symbols-outlined text-[14px]">visibility</span> View Work' +
                              '</button>' +
                              '<a href="/api/elms.php?action=download_submission&id=' + subId + '&file_idx=' + idx + '" target="_blank" class="p-1 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors inline-flex items-center" title="Download">' +
@@ -1221,6 +1220,22 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
         var ROSTER_POLL_INTERVAL = null;
         var COUNTDOWN_TIMER = null;
         var TEACHER_MEET_WINDOW = null;
+
+        function openLiveClassControlPanelByCourse(courseIdentifier) {
+            var c = (FACULTY_COURSES || []).find(function(item) {
+                return String(item.id) === String(courseIdentifier) || item.code === courseIdentifier;
+            });
+            if (!c) return;
+            openLiveClassControlPanel(c.code, c.title, c.section, c.live_session || {}, c.id);
+        }
+
+        function openStartLiveModalByCourse(courseIdentifier) {
+            var c = (FACULTY_COURSES || []).find(function(item) {
+                return String(item.id) === String(courseIdentifier) || item.code === courseIdentifier;
+            });
+            if (!c) return;
+            openStartLiveModal(c.code, c.title, c.section, c.id);
+        }
 
         function openStartLiveModal(code, title, section, courseId) {
             document.getElementById('live-course-code').value = code;
