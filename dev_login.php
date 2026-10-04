@@ -86,6 +86,9 @@ if (!empty($emailParam)) {
 }
 
 $role = $_GET['role'] ?? 'student';
+if ($role === 'faculty') {
+    $role = 'teacher';
+}
 if (!in_array($role, ['student', 'teacher', 'admin'])) {
     $role = 'student';
 }

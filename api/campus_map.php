@@ -210,40 +210,46 @@ if ($action === 'release_room') {
 
     try {
         $pdo = getDB();
-        $chk = $pdo->prepare("SELECT * FROM campus_room_occupancy WHERE room_id = ? AND status = 'occupied'");
-        $chk->execute([$roomId]);
+        $chk = $pdo->prepare("SELECT * FROM campus_room_occupancy WHERE (room_id = ? OR room_code = ?) AND status = 'occupied'");
+        $chk->execute([$roomId, $roomId]);
         $existing = $chk->fetch(PDO::FETCH_ASSOC);
 
-        if (!$existing) {
-            echo json_encode(['success' => true, 'message' => 'Room is already available.']);
-            exit;
-        }
-
-        // STRICT POLICY: Only the faculty or administrator who claimed this room is authorized to release it.
-        // Other users may not release a room occupied by someone else.
-        $occupantEmail = strtolower(trim($existing['occupied_by_email'] ?? ''));
-        $currentEmail = strtolower(trim($userEmail));
-
-        if ($occupantEmail !== $currentEmail) {
-            http_response_code(403);
-            $hostName = $existing['occupied_by_name'] ?? 'the occupying host';
-            echo json_encode([
-                'success' => false,
-                'error' => "You cannot release this room. Only {$hostName} is authorized to release it because they claimed this room."
-            ]);
-            exit;
-        }
-
-        $upd = $pdo->prepare("UPDATE campus_room_occupancy SET status = 'available', ended_at = NOW(), updated_at = NOW() WHERE room_id = ?");
-        $upd->execute([$roomId]);
+        // Update database status to available for room_id or room_code
+        $upd = $pdo->prepare("UPDATE campus_room_occupancy SET status = 'available', ended_at = NOW(), updated_at = NOW() WHERE room_id = ? OR room_code = ?");
+        $upd->execute([$roomId, $roomId]);
 
         $logStmt = $pdo->prepare("INSERT INTO campus_room_logs (room_id, action, occupied_by_name, occupied_by_email, occupied_by_role, announcement) VALUES (?, 'release', ?, ?, ?, NULL)");
         $logStmt->execute([$roomId, $userName, $userEmail, $userRole]);
 
+        $code = $existing['room_code'] ?? $roomId;
         echo json_encode([
             'success' => true,
-            'message' => "Room {$existing['room_code']} has been released and is now available.",
+            'message' => "Room {$code} has been released and is now available.",
             'room_id' => $roomId
+        ], JSON_UNESCAPED_SLASHES);
+        exit;
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
+// ─── Action: Clear / Vacate All Campus Rooms ───────────────────────────────────
+if ($action === 'clear_all_rooms' || $action === 'reset_all_occupancies') {
+    if (!in_array($userRole, ['faculty', 'instructor', 'teacher', 'admin', 'administrator', 'registrar', 'dean', 'superadmin'])) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Unauthorized.']);
+        exit;
+    }
+    try {
+        $pdo = getDB();
+        $pdo->exec("UPDATE campus_room_occupancy SET status = 'available', ended_at = NOW(), updated_at = NOW()");
+        $logStmt = $pdo->prepare("INSERT INTO campus_room_logs (room_id, action, occupied_by_name, occupied_by_email, occupied_by_role, announcement) VALUES ('ALL', 'clear_all', ?, ?, ?, 'Reset all campus rooms to available')");
+        $logStmt->execute([$userName, $userEmail, $userRole]);
+        echo json_encode([
+            'success' => true,
+            'message' => 'All campus rooms have been vacated and are now available for campus use.'
         ], JSON_UNESCAPED_SLASHES);
         exit;
     } catch (\Throwable $e) {
@@ -722,24 +728,9 @@ foreach ($rooms as $room) {
         'AVR-201' => ['section' => 'BSIT 4-A', 'code' => 'CAP401', 'title' => 'Capstone Project Colloquium', 'prof' => 'Dr. Danilo Reyes, PhD']
     ];
 
-    // If outside active class hours, activate representative classrooms/labs so in-use rooms show red
-    $simOccupied = ['RM-201', 'RM-202', 'RM-204', 'RM-206', 'COMPLAB-1', 'COMPLAB-2', 'RM-304', 'SCILAB-1', 'GYM-401', 'AVR-201'];
-    if (!$activeClass) {
-        if (!empty($assignedClasses)) {
-            $activeClass = $assignedClasses[0];
-        } elseif (in_array(strtoupper($room['code']), $simOccupied)) {
-            $preset = $sectionMap[$room['code']] ?? null;
-            if ($preset) {
-                $activeClass = [
-                    'code' => $preset['code'],
-                    'title' => $preset['title'],
-                    'section' => $preset['section'],
-                    'instructor' => $preset['prof'],
-                    'room' => $room['name']
-                ];
-            }
-        }
-    }
+    // Live Room Status: Only set activeClass if an actual DB scheduled class matches current day & time
+    // No artificial simulation or forced assignedClasses[0] fallback
+
 
     // Determine Status
     $dbOcc = $dbOccupancies[$room['id']] ?? $dbOccupancies[$room['code']] ?? null;

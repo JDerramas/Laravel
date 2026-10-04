@@ -1,13 +1,9 @@
 <?php
-require_once dirname(__DIR__) . '/includes/supabase_helper.php';
-$db = getDB();
-
-echo "=== CLASSES COLUMNS ===\n";
-$cols = $db->query('DESCRIBE classes')->fetchAll(PDO::FETCH_ASSOC);
-foreach ($cols as $c) {
-    echo "{$c['Field']} ({$c['Type']})\n";
+require_once __DIR__ . '/../includes/db.php';
+try {
+    $pdo = getDB();
+    $stmt = $pdo->query("SELECT room_id, room_code, status, occupied_by_name, occupied_by_email FROM campus_room_occupancy");
+    print_r($stmt->fetchAll(PDO::FETCH_ASSOC));
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
 }
-
-echo "\n=== ALL CLASSES ROWS ===\n";
-$rows = $db->query('SELECT * FROM classes')->fetchAll(PDO::FETCH_ASSOC);
-print_r($rows);

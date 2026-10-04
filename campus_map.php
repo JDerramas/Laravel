@@ -1176,6 +1176,12 @@ $PAGE_TITLE = isset($PAGE_TITLE) ? $PAGE_TITLE : 'NPC Map · NPC LMS';
                                     <span class="material-symbols-outlined text-[16px]">videocam</span>
                                     <span>Enter Hybrid Virtual Room ↗</span>
                                 </a>
+
+                                <!-- Reset All Occupied Rooms (Admin & Faculty) -->
+                                <button type="button" id="btn-reset-all-rooms" onclick="handleClearAllRooms()" class="w-full py-2 px-3 rounded-xl border border-slate-700 bg-slate-800/60 hover:bg-rose-950/40 hover:border-rose-500/50 text-slate-300 hover:text-rose-300 text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-1" title="Reset all campus rooms to available">
+                                    <span class="material-symbols-outlined text-sm">restart_alt</span>
+                                    <span>Vacate / Reset All In-Use Rooms</span>
+                                </button>
                             </div>
                         <?php else: ?>
                             <!-- Notice for students: Clean View Only without admin buttons -->
@@ -1517,7 +1523,8 @@ $PAGE_TITLE = isset($PAGE_TITLE) ? $PAGE_TITLE : 'NPC Map · NPC LMS';
                         },
                         body: JSON.stringify({
                             action: 'release_room',
-                            room_id: room.id
+                            room_id: room.id,
+                            room_code: room.code
                         })
                     });
                     const res = await resp.json();
@@ -1525,6 +1532,19 @@ $PAGE_TITLE = isset($PAGE_TITLE) ? $PAGE_TITLE : 'NPC Map · NPC LMS';
                     if (res.success) {
                         if (typeof window.notify === 'function') {
                             window.notify(res.message || `Room ${roomLabel} is now released.`, 'success', 4000);
+                        }
+                        if (state.roomStatuses) {
+                            delete state.roomStatuses[room.id];
+                            if (room.code) delete state.roomStatuses[room.code];
+                        }
+                        if (state.occupancies) {
+                            delete state.occupancies[room.id];
+                            if (room.code) delete state.occupancies[room.code];
+                        }
+                        room.status = 'available';
+                        room.occupancy = null;
+                        if (typeof window.updateInspectorLiveComponents === 'function') {
+                            window.updateInspectorLiveComponents(room);
                         }
                         if (typeof window.pollRealtimeOccupancy === 'function') {
                             await window.pollRealtimeOccupancy(true);
@@ -1538,6 +1558,47 @@ $PAGE_TITLE = isset($PAGE_TITLE) ? $PAGE_TITLE : 'NPC Map · NPC LMS';
                     }
                 } catch (err) {
                     console.error('Release room error:', err);
+                }
+            };
+
+            window.handleClearAllRooms = async function() {
+                if (!confirm('Are you sure you want to release and reset ALL campus rooms? All rooms will immediately be set to Available.')) {
+                    return;
+                }
+                try {
+                    const resp = await fetch('/api/campus_map.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'clear_all_rooms' })
+                    });
+                    const res = await resp.json();
+                    if (res.success) {
+                        if (typeof window.notify === 'function') {
+                            window.notify(res.message || 'All rooms have been released and are now available!', 'success', 4000);
+                        }
+                        state.roomStatuses = {};
+                        state.occupancies = {};
+                        if (state.campusData && Array.isArray(state.campusData)) {
+                            state.campusData.forEach(r => {
+                                if (r.status === 'occupied') r.status = 'available';
+                                r.occupancy = null;
+                            });
+                        }
+                        if (state.selectedRoom) {
+                            state.selectedRoom.status = 'available';
+                            state.selectedRoom.occupancy = null;
+                            if (typeof window.updateInspectorLiveComponents === 'function') {
+                                window.updateInspectorLiveComponents(state.selectedRoom);
+                            }
+                        }
+                        if (typeof window.pollRealtimeOccupancy === 'function') {
+                            await window.pollRealtimeOccupancy(true);
+                        }
+                    } else {
+                        alert(res.error || 'Failed to reset rooms.');
+                    }
+                } catch (err) {
+                    console.error('Clear all rooms error:', err);
                 }
             };
 
@@ -1673,10 +1734,11 @@ $PAGE_TITLE = isset($PAGE_TITLE) ? $PAGE_TITLE : 'NPC Map · NPC LMS';
                     } else {
                         if (btnClaim) btnClaim.classList.add('hidden');
 
-                        // STRICT OWNERSHIP: Only the host user is authorized to release their room
+                        // Authorized Faculty and Administrators can release occupied rooms
                         const isHost = occ && occ.occupied_by_email && (occ.occupied_by_email.toLowerCase().trim() === userEmail.trim());
+                        const canRelease = isHost || isUserFacultyOrAdmin;
 
-                        if (isHost) {
+                        if (canRelease) {
                             if (occupiedActions) {
                                 occupiedActions.classList.remove('hidden');
                                 occupiedActions.classList.add('flex');
@@ -1685,8 +1747,8 @@ $PAGE_TITLE = isset($PAGE_TITLE) ? $PAGE_TITLE : 'NPC Map · NPC LMS';
                         } else {
                             if (occupiedActions) occupiedActions.classList.add('hidden');
                             if (studentNotice) {
-                                const host = occ?.occupied_by_name || 'another faculty/admin';
-                                studentNotice.innerHTML = `🔒 Room is currently in use by <strong class="text-amber-300">${host}</strong>.<br><span class="text-[10px] text-slate-400">Only the host is authorized to release this room.</span>`;
+                                const host = occ?.occupied_by_name || 'Faculty / In-Use';
+                                studentNotice.innerHTML = `🔒 Room is currently in use by <strong class="text-amber-300">${host}</strong>.`;
                                 studentNotice.classList.remove('hidden');
                             }
                         }
