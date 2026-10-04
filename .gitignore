@@ -25,3 +25,10 @@ ngrok.exe
 .agents/
 .vscode/
 .idea/
+.obsidian/
+
+# Temp logs and backups
+tunnel.log
+cookies_admin.txt
+public_url.txt
+plugnmeet_bk/

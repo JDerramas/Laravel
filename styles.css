@@ -359,6 +359,21 @@ aside#sidebar {
     100% { transform: translateX(100%); }
 }
 
+/* Skeleton composition variants */
+.sk-line { height: 0.75rem; margin-bottom: 0.5rem; }
+.sk-line.w-1\/2 { width: 50%; } .sk-line.w-2\/3 { width: 66%; } .sk-line.w-3\/4 { width: 75%; }
+.sk-title { height: 1.25rem; width: 40%; margin-bottom: 0.75rem; }
+.sk-avatar { width: 2.5rem; height: 2.5rem; border-radius: 9999px; flex-shrink: 0; }
+.sk-card { border: 1px solid rgb(var(--outline-variant-rgb)); padding: 1rem; }
+.sk-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.25rem; }
+.sk-chip { display: inline-block; width: 3.5rem; height: 1.1rem; }
+.sk-table-row { display: grid; grid-template-columns: 1.2fr 2fr 1fr 1fr; gap: 1rem; padding: 0.6rem 0; }
+
+/* Respect reduced motion for shimmer */
+@media (prefers-reduced-motion: reduce) {
+    .skeleton::after { animation: none; }
+}
+
 /* ============================================================
    TOASTS
    ============================================================ */
@@ -674,6 +689,14 @@ aside#sidebar {
     from { opacity: 0; transform: translateY(-8px) scale(.98); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+@keyframes tipInDown {
+    from { opacity: 0; transform: translate(-50%, -6px) scale(.95); }
+    to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+@keyframes tipInUp {
+    from { opacity: 0; transform: translate(-50%, 6px) scale(.95); }
+    to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
 @keyframes backdropIn {
     from { opacity: 0; }
     to   { opacity: 1; }
@@ -692,6 +715,9 @@ aside#sidebar {
 }
 .animate-float   { animation: floatY 5s ease-in-out infinite; }
 .animate-pulse-dot { animation: pulseSoft 2s infinite; }
+/* Dashboard next-class highlight + ticker entrance (reuse existing keyframes) */
+.animate-subtle-pulse { animation: pulseSoft 2.4s ease-in-out infinite; }
+.animate-fade-in { animation: fadeIn 0.35s ease-out both; }
 
 /* ------------------------------------------------------------
    5. AURORA SCENE (login / hero backdrops)
@@ -736,12 +762,12 @@ aside#sidebar {
     right: 0;
     top: calc(100% + 10px);
     min-width: 320px;
-    max-width: 92vw;
+    max-width: min(380px, calc(100vw - 24px));
     background: rgb(var(--surface-container-lowest-rgb));
     border: 1px solid rgb(var(--outline-variant-rgb));
     border-radius: 16px;
-    box-shadow: var(--shadow-lg);
-    z-index: 60;
+    box-shadow: var(--shadow-xl);
+    z-index: 100;
     animation: slideDownMenu .22s cubic-bezier(.22, .68, .32, 1) both;
     overflow: hidden;
 }
@@ -885,7 +911,7 @@ aside#sidebar {
     left: 50%;
     transform: translateX(-50%);
     white-space: nowrap;
-    padding: .35rem .6rem;
+    padding: .35rem .65rem;
     border-radius: 8px;
     background: rgb(var(--primary-rgb));
     color: rgb(var(--on-primary-rgb));
@@ -894,9 +920,27 @@ aside#sidebar {
     font-weight: 600;
     letter-spacing: .02em;
     box-shadow: var(--shadow-md);
-    z-index: 80;
+    z-index: 90;
     pointer-events: none;
-    animation: popIn .18s ease both;
+    animation: tipInUp .18s cubic-bezier(.22, .68, .32, 1) both;
+}
+
+/* Tooltips in headers, topbars, or top-edge elements MUST point DOWNWARDS so they are never clipped off the top of the viewport */
+header [data-tip]:hover::after,
+#topbar [data-tip]:hover::after,
+.npc-topbar [data-tip]:hover::after,
+[data-tip-pos="down"]:hover::after {
+    bottom: auto;
+    top: calc(100% + 8px);
+    animation: tipInDown .18s cubic-bezier(.22, .68, .32, 1) both;
+}
+
+/* Suppress tooltip when dropdown/popover is actively open */
+#npc-notif-center.is-open #npc-notif-btn::after,
+#npc-notif-center:has(#npc-notif-panel:not(.hidden)) #npc-notif-btn::after,
+#npc-portal-switcher.is-open #npc-portal-btn::after,
+#npc-portal-switcher:has(#npc-portal-menu:not(.hidden)) #npc-portal-btn::after {
+    display: none !important;
 }
 
 /* ------------------------------------------------------------
@@ -1010,6 +1054,8 @@ aside#sidebar {
     .aurora-scene .orb,
     .eq span,
     .animate-pulse-dot,
+    .animate-subtle-pulse,
+    .animate-fade-in,
     .btn-shine::before {
         animation: none !important;
         transition: none !important;
@@ -1286,14 +1332,114 @@ html.dark .docs-separator { background-color: rgb(var(--outline-variant-rgb)) !i
    Unlike bg-primary (which flips light in dark mode), this
    stays deep navy in BOTH themes — the User Management look.
    ------------------------------------------------------------ */
-.npc-navy-card {
+/* ------------------------------------------------------------
+   20. NAVY HERO CARD & COMPONENTS — Theme-proof inverted elements.
+   Unlike bg-primary (which flips light azure in dark mode),
+   .npc-navy-card stays deep collegiate navy in BOTH themes,
+   ensuring crisp white titles and high-contrast sky-blue subtitles.
+   ------------------------------------------------------------ */
+.npc-navy-card,
+html.dark .npc-navy-card,
+.dark .npc-navy-card {
     background:
         radial-gradient(500px 240px at 110% -20%, rgba(254, 212, 136, .16), transparent 60%),
-        rgb(var(--nav-bg-rgb));
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, .08);
+        linear-gradient(135deg, #001736 0%, #00224d 55%, #002c63 100%) !important;
+    background-color: #001736 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, .12) !important;
 }
-.npc-navy-card .text-on-primary-container { color: rgba(170, 199, 255, .95); }
+
+html.dark .npc-navy-card,
+.dark .npc-navy-card {
+    background:
+        radial-gradient(500px 240px at 110% -20%, rgba(254, 212, 136, .14), transparent 60%),
+        linear-gradient(135deg, #071326 0%, #0c1c38 55%, #102447 100%) !important;
+    background-color: #071326 !important;
+    border-color: rgba(170, 199, 255, .18) !important;
+}
+
+/* Force all headings and primary text inside navy cards to pure crisp white */
+.npc-navy-card h1,
+.npc-navy-card h2,
+.npc-navy-card h3,
+.npc-navy-card h4,
+.npc-navy-card h5,
+.npc-navy-card h6,
+.npc-navy-card .text-on-primary,
+.npc-navy-card .text-white {
+    color: #ffffff !important;
+}
+
+/* Ensure icons that should stay white inside npc-navy-card don't invert to dark navy */
+.npc-navy-card > .material-symbols-outlined,
+.npc-navy-card .material-symbols-outlined:not(.text-secondary-container):not([class*="text-amber"]):not([class*="text-gold"]):not([class*="fill"]) {
+    color: #ffffff !important;
+}
+
+/* Ensure subtitles, descriptions, and secondary metadata inside navy cards are luminous sky-blue (>10:1 contrast) */
+.npc-navy-card p:not([class*="text-white"]):not([class*="text-amber"]):not([class*="text-secondary"]),
+.npc-navy-card .text-on-primary-container,
+.npc-navy-card .text-primary-fixed-dim,
+.npc-navy-card .text-inverse-primary,
+.npc-navy-card .text-on-surface-variant,
+.npc-navy-card span.text-on-primary-container,
+.npc-navy-card span.text-blue-100,
+.npc-navy-card span.text-blue-200 {
+    color: #c2d8ff !important;
+}
+
+/* Preserve gold/secondary container buttons inside navy cards */
+.npc-navy-card .bg-secondary-container {
+    background-color: rgb(var(--secondary-container-rgb)) !important;
+    color: rgb(var(--on-secondary-container-rgb)) !important;
+}
+.npc-navy-card .bg-secondary-container .material-symbols-outlined,
+.npc-navy-card .bg-secondary-container span {
+    color: rgb(var(--on-secondary-container-rgb)) !important;
+}
+
+/* Universal guard: When text-on-primary-container is rendered inside bg-primary without npc-navy-card in dark mode */
+.dark .bg-primary:not(.npc-navy-card) .text-on-primary-container {
+    color: rgba(0, 30, 62, 0.88) !important;
+}
+
+/* ------------------------------------------------------------
+   20B. NPC COLLEGIATE MODAL DIALOGS (Universal Confirm & Alert)
+   Replaces browser native "localhost:8000 says" with styled UI.
+   ------------------------------------------------------------ */
+#npc-modal-dialog-overlay {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#npc-modal-dialog-card {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease;
+    box-shadow: 0 24px 48px -12px rgba(0, 23, 54, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.dark #npc-modal-dialog-card {
+    background-color: #0d1624 !important;
+    border-color: rgba(170, 199, 255, 0.18) !important;
+    box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(170, 199, 255, 0.14) !important;
+}
+
+.dark #npc-modal-title {
+    color: #ffffff !important;
+}
+
+.dark #npc-modal-message {
+    color: #c2d8ff !important;
+}
+
+.dark #npc-modal-btn-cancel {
+    border-color: rgba(170, 199, 255, 0.2) !important;
+    color: #e2e8f0 !important;
+}
+
+.dark #npc-modal-btn-cancel:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
 
 /* ------------------------------------------------------------
    21. UNIVERSAL NOTIFICATION BADGE & WRAPPER
@@ -1372,5 +1518,269 @@ html.dark .docs-separator { background-color: rgb(var(--outline-variant-rgb)) !i
 .announcement-body {
     overflow-wrap: anywhere;
     word-break: break-word;
+}
+
+
+
+/* ── Gradebook compact toolbar buttons ── */
+.icon-btn {
+    width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    color: rgb(var(--on-surface-variant-rgb));
+    transition: all .15s ease;
+}
+.icon-btn:hover { background: rgb(var(--surface-container-rgb)); color: rgb(var(--primary-rgb)); }
+@media (prefers-reduced-motion: reduce) { .icon-btn { transition: none; } }
+
+/* ============================================================
+   22. THREE.JS 3D ANIMATION SYSTEM (npc-three.js)
+   ============================================================ */
+#npc-three-bg-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity .8s ease;
+}
+
+html.dark #npc-three-bg-canvas {
+    opacity: 0.7;
+}
+
+html:not(.dark) #npc-three-bg-canvas {
+    opacity: 0.92;
+}
+
+#app-root,
+#main-wrapper {
+    background-color: transparent !important;
+}
+
+#npc-login-3d-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+#npc-scanner-3d-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 22;
+}
+
+.npc-ai-core-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: radial-gradient(circle, rgba(var(--primary-container-rgb), 0.18) 0%, transparent 70%);
+}
+
+.npc-ai-core-canvas {
+    pointer-events: none;
+    filter: drop-shadow(0 0 14px rgba(254, 212, 136, 0.45)) drop-shadow(0 0 20px rgba(56, 189, 248, 0.35));
+    transition: transform .3s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* 3D Glassmorphism Specular Accent for .tilt cards */
+.tilt {
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform .18s cubic-bezier(.22, .68, .32, 1), box-shadow .25s ease;
+}
+.tilt::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at var(--spec-x, 50%) var(--spec-y, 50%), rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .3s ease;
+}
+.tilt:hover::after {
+    opacity: 1;
+}
+
+/* 3D Holographic Badge Ring */
+.hologram-glow {
+    box-shadow: 0 0 25px rgba(254, 212, 136, 0.25), inset 0 0 15px rgba(56, 189, 248, 0.15);
+}
+
+/* ============================================================
+   3D ANIMATION SUITE (COLLEGIATE DEPTH & INTERACTION)
+   ============================================================ */
+
+/* 1. Global 3D Container & Preservation */
+.npc-3d-wrap {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+/* 2. Bento Quick Action Tiles with 3D Depth */
+.npc-tile,
+.npc-card {
+    transform-style: preserve-3d;
+    transition: transform .32s cubic-bezier(.25, .8, .25, 1), box-shadow .32s ease, border-color .32s ease;
+    will-change: transform;
+}
+
+.npc-tile:hover,
+.npc-card:hover {
+    transform: perspective(900px) translateY(-5px) translateZ(8px);
+    box-shadow: 0 16px 32px -8px rgba(0, 23, 54, 0.18), 0 0 20px rgba(254, 212, 136, 0.16);
+    border-color: rgba(var(--primary-rgb), 0.35);
+}
+
+/* 3. 3D Elevated Icons */
+.npc-tile-icon,
+.icon-3d {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+    transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), filter .35s ease;
+    will-change: transform;
+}
+
+.npc-tile:hover .npc-tile-icon,
+.icon-3d:hover {
+    transform: perspective(600px) translateZ(20px) scale(1.18) rotateY(12deg) rotateX(-6deg);
+    filter: drop-shadow(0 8px 16px rgba(0, 23, 54, 0.35)) drop-shadow(0 0 10px rgba(254, 212, 136, 0.4));
+}
+
+/* 4. Continuous 3D Floating Levitation */
+@keyframes float3D {
+    0%, 100% {
+        transform: perspective(700px) translateY(0px) rotateX(0deg) rotateY(0deg) translateZ(0px);
+    }
+    25% {
+        transform: perspective(700px) translateY(-5px) rotateX(4deg) rotateY(-6deg) translateZ(10px);
+    }
+    50% {
+        transform: perspective(700px) translateY(-9px) rotateX(-3deg) rotateY(5deg) translateZ(14px);
+    }
+    75% {
+        transform: perspective(700px) translateY(-4px) rotateX(3deg) rotateY(-3deg) translateZ(8px);
+    }
+}
+
+.animate-float-3d {
+    display: inline-block;
+    animation: float3D 4.5s ease-in-out infinite;
+    transform-style: preserve-3d;
+}
+
+/* 5. Continuous 3D Y-Axis Rotation for Live & Sync Indicators */
+@keyframes spin3D {
+    0% {
+        transform: perspective(500px) rotateY(0deg);
+    }
+    100% {
+        transform: perspective(500px) rotateY(360deg);
+    }
+}
+
+.animate-spin-3d {
+    display: inline-block;
+    animation: spin3D 7s linear infinite;
+    transform-style: preserve-3d;
+}
+
+/* 6. Volumetric 3D Pulse for Live Broadcasts */
+@keyframes radarPulse3D {
+    0% {
+        transform: perspective(500px) scale(1) translateZ(0);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    60% {
+        transform: perspective(500px) scale(1.10) translateZ(12px);
+        box-shadow: 0 0 0 14px rgba(239, 68, 68, 0);
+    }
+    100% {
+        transform: perspective(500px) scale(1) translateZ(0);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.animate-radar-3d {
+    animation: radarPulse3D 2.2s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
+    transform-style: preserve-3d;
+}
+
+/* 7. Tactile 3D Physical Push Button */
+.btn-3d {
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform .15s ease, box-shadow .15s ease;
+    box-shadow: 0 5px 0 rgba(0, 15, 35, 0.3), 0 8px 18px rgba(0, 23, 54, 0.18);
+}
+
+.btn-3d:hover {
+    transform: translateY(-2px) translateZ(6px);
+    box-shadow: 0 7px 0 rgba(0, 15, 35, 0.3), 0 12px 24px rgba(0, 23, 54, 0.22);
+}
+
+.btn-3d:active {
+    transform: translateY(4px) translateZ(0);
+    box-shadow: 0 1px 0 rgba(0, 15, 35, 0.3), 0 3px 6px rgba(0, 23, 54, 0.12);
+}
+
+/* 8. 3D Achievement Coin / Badge Flip */
+@keyframes coinFlip3D {
+    0%, 100% {
+        transform: perspective(600px) rotateY(0deg);
+    }
+    50% {
+        transform: perspective(600px) rotateY(180deg);
+    }
+}
+
+.animate-coin-3d {
+    display: inline-block;
+    animation: coinFlip3D 5s ease-in-out infinite;
+    transform-style: preserve-3d;
+}
+
+/* 9. Floating GWA / Action FAB in 3D */
+#npc-gwa-fab {
+    transform-style: preserve-3d;
+    transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), box-shadow .3s ease;
+    box-shadow: 0 8px 24px -4px rgba(0, 23, 54, 0.35), 0 0 16px rgba(254, 212, 136, 0.3);
+}
+
+#npc-gwa-fab:hover {
+    transform: perspective(600px) translateY(-6px) translateZ(16px) rotateX(10deg) rotateY(-10deg) scale(1.08);
+    box-shadow: 0 16px 36px -6px rgba(0, 23, 54, 0.45), 0 0 24px rgba(254, 212, 136, 0.5);
+}
+
+#npc-gwa-fab:hover span {
+    display: inline-block;
+    animation: spin3D 4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #npc-three-bg-canvas,
+    #npc-login-3d-canvas,
+    #npc-scanner-3d-canvas,
+    .npc-ai-core-canvas,
+    .animate-float-3d,
+    .animate-spin-3d,
+    .animate-radar-3d,
+    .animate-coin-3d {
+        display: none !important;
+        animation: none !important;
+        transform: none !important;
+    }
 }
 

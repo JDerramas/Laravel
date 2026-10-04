@@ -1,0 +1,124 @@
+{
+    "2026-09-01": [
+        {
+            "id": "ev-001",
+            "title": "Start of 1st Semester Classes",
+            "type": "academic",
+            "desc": "Opening of regular synchronous & in-person lectures across all programs."
+        }
+    ],
+    "2026-09-09": [
+        {
+            "id": "ev-002",
+            "title": "Regular Academic Day",
+            "type": "academic",
+            "desc": "Active lectures, lab consultations & attendance QR sessions."
+        }
+    ],
+    "2026-09-15": [
+        {
+            "id": "ev-003",
+            "title": "Prelim Examination Week Begins",
+            "type": "exam",
+            "desc": "Preliminary examinations across all collegiate programs."
+        }
+    ],
+    "2026-09-16": [
+        {
+            "id": "ev-004",
+            "title": "Prelim Examination Day 2",
+            "type": "exam",
+            "desc": "Scheduled exams for AIS, BSIS, and BSA collegiate programs."
+        }
+    ],
+    "2026-09-21": [
+        {
+            "id": "ev-005",
+            "title": "Prelim Grade Submission Window",
+            "type": "deadline",
+            "desc": "Faculty encoding window for preliminary grade submission."
+        }
+    ],
+    "2026-09-25": [
+        {
+            "id": "ev-5a80a148",
+            "title": "NPC Innovation & Tech Summit 2026",
+            "type": "event",
+            "desc": "Annual collegiate technology symposium and showcase.",
+            "updated_at": "2026-09-09 18:19:20",
+            "updated_by": "admin@navotaspolytechniccollege.edu.ph"
+        }
+    ],
+    "2026-10-05": [
+        {
+            "id": "ev-006",
+            "title": "World Teachers' Day Celebration",
+            "type": "event",
+            "desc": "NPC Campus celebration and recognition honoring collegiate faculty."
+        }
+    ],
+    "2026-10-26": [
+        {
+            "id": "ev-008",
+            "title": "Midterm Grade Posting Deadline",
+            "type": "deadline",
+            "desc": "Official registrar publication of mid-semester collegiate grades."
+        }
+    ],
+    "2026-11-01": [
+        {
+            "id": "ev-009",
+            "title": "All Saints' Day (No Classes)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday across all campus branches."
+        }
+    ],
+    "2026-11-02": [
+        {
+            "id": "ev-010",
+            "title": "All Souls' Day (Academic Recess)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday & institutional break."
+        }
+    ],
+    "2026-11-16": [
+        {
+            "id": "ev-011",
+            "title": "Semi-Final Examinations",
+            "type": "exam",
+            "desc": "Pre-final exam week for college divisions."
+        }
+    ],
+    "2026-11-30": [
+        {
+            "id": "ev-012",
+            "title": "Bonifacio Day (Campus Closed)",
+            "type": "holiday",
+            "desc": "Regular National Holiday."
+        }
+    ],
+    "2026-12-14": [
+        {
+            "id": "ev-013",
+            "title": "Final Examinations Week",
+            "type": "exam",
+            "desc": "Final exams for 1st Semester AY 2026–2027."
+        }
+    ],
+    "2026-12-21": [
+        {
+            "id": "ev-014",
+            "title": "Final Grade Encoding Deadline",
+            "type": "deadline",
+            "desc": "Final grade submission deadline before registrar verification."
+        }
+    ],
+    "2026-12-22": [
+        {
+            "id": "ev-015",
+            "title": "Start of Christmas Vacation",
+            "type": "holiday",
+            "desc": "Semestral academic recess begins."
+        }
+    ]
+}

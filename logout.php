@@ -5,7 +5,7 @@
  * Properly destroys the PHP session (cookies, data, ID),
  * then signs out from Supabase client-side.
  */
-require_once __DIR__ . '/supabase_helper.php';
+require_once __DIR__ . '/includes/supabase_helper.php';
 
 // Log the logout event before destroying the session
 if (session_status() === PHP_SESSION_NONE) session_start();
@@ -46,6 +46,10 @@ $jsConfig = getJsConfig();
         })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Three.js 3D Engine & NPC Visuals -->
+    <script src="/assets/js/three.min.js"></script>
+    <script src="/assets/js/npc-three.js"></script>
+    <script src="/assets/js/npc.js"></script>
 </head>
 <body style="font-family: 'Geist', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--surface-rgb, #f8f9ff); margin: 0;">
     <div style="text-align: center;">

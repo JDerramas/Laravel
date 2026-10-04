@@ -1,0 +1,62 @@
+/**
+ * plugnmeet-overrides.css — NPC ELMS
+ * Hides PlugNmeet branding, countdown timer, and applies NPC theming
+ * This file is loaded by config.js custom_css_url
+ */
+
+/* ─── HIDE COUNTDOWN TIMER ─── */
+/* The timer/duration bar that shows remaining room time */
+[class*="roomDuration"],
+[class*="RoomDuration"],
+[class*="room-duration"],
+[class*="duration-timer"],
+[class*="durationTimer"],
+[class*="timer-wrap"],
+[class*="timerWrap"],
+.room-duration,
+.duration-timer,
+.timer-wrap,
+#room-duration,
+#duration-timer {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Hide any element containing countdown text patterns */
+[data-testid*="duration"],
+[data-testid*="timer"],
+[data-testid*="countdown"] {
+    display: none !important;
+}
+
+/* ─── HIDE PLUGNMEET LOGO / BRANDING ─── */
+/* Header logo images */
+header img[src*="plugnmeet"],
+header img[src*="plugNmeet"],
+header img[src*="main-logo"],
+[class*="headerLogo"] img,
+[class*="header-logo"] img,
+.header-logo img {
+    content: url('/assets/img/npc-logo.png') !important;
+    max-height: 28px !important;
+    object-fit: contain !important;
+}
+
+/* Any text that says "plugNmeet" */
+[class*="poweredBy"],
+[class*="powered-by"],
+.powered-by,
+footer [class*="brand"],
+[class*="brandText"] {
+    display: none !important;
+}
+
+/* ─── NPC COLOR OVERRIDES ─── */
+/* Ensure NPC emerald/green theming */
+:root {
+    --pnm-primary: #059669 !important;
+    --pnm-primary-hover: #047857 !important;
+}

@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "@ngrok/ngrok": "^1.7.0"
+    "@ngrok/ngrok": "^1.7.0",
+    "gsap": "^3.15.0",
+    "gsap-trial": "^3.12.7"
   }
 }

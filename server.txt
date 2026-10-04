@@ -1,10 +1,23 @@
-Sa unang terminal (PHP Server):
-powershell
+NPC ELMS - LIVE WEBSITE ACCESS
+==================================================
+
+Ang iyong Permanent Live HTTPS Link para sa Phone, Tablet, o kahit anong browser:
+👉 https://twice-careless-occultist.ngrok-free.dev
+
+Paalala para sa Phone Access:
+1. Pagkabukas sa cellphone, kung may lumabas na blue button na "Visit Site" (ngrok security interstitial), i-tap lamang ang "Visit Site".
+2. Makikita mo na agad ang Sign In page ng NPC ELMS.
+3. Dahil HTTPS ito, gagana nang perpekto ang Camera, Mic, at WebRTC sa Virtual Classroom kahit sa cellphone!
+
+Para mag-login sa Phone:
+- Admin Portal: Mag-login gamit ang admin credentials o pumunta sa /dev_login.php?role=admin
+- Faculty Portal: /dev_login.php?role=teacher
+- Student Portal: /dev_login.php?role=student
+
+Kapag manu-manong papaganahin sa mga susunod na araw:
+Terminal 1 (PHP Server):
 php -S 0.0.0.0:8000
 
-Sa pangalawang terminal (ngrok Permanent Tunnel):
-powershell
-node tunnel.js
-
-Ang iyong Permanent ngrok Link:
-https://twice-careless-occultist.ngrok-free.dev
+Terminal 2 (ngrok Tunnel):
+ngrok http 8000 --url=https://twice-careless-occultist.ngrok-free.dev
+==================================================

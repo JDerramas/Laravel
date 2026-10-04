@@ -1,0 +1,12 @@
+# NPC Connect — Deny all direct web access to sensitive files
+# Place in app root. Apache only (XAMPP/WAMP).
+
+# Block direct access to .env and any dotfiles
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Block access to backup / SQL / log / md files
+<FilesMatch "\.(sql|env|log|bak|md|json)$|(\.bak\.|backup)">
+    Require all denied
+</FilesMatch>

@@ -1,0 +1,81 @@
+/* NPC ELMS — PlugNmeet Client Overrides
+ * Completely hides the logo and countdown timer as requested by the user.
+ * Loaded via designCustomization.custom_css_url in config.js
+ */
+
+/* 1. HIDE ALL LOGOS COMPLETELY */
+img[alt="logo"],
+.left img,
+.left-logo,
+.logo-area,
+.header-logo,
+.main-logo,
+header img,
+header .left img,
+header .left svg,
+[class*="logo-"],
+[class*="-logo"],
+.logo,
+#logo {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 2. HIDE ALL TIMERS & COUNTDOWNS COMPLETELY */
+.timer,
+[class*="timer"],
+[id*="timer"],
+.header-timer,
+.room-timer,
+.time-counter,
+.duration-timer,
+.room-duration,
+header .timer,
+.center .timer,
+span[class*="timer"] {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 3. HIDE any remaining "powered by" or "plugnmeet" text watermarks */
+[class*="powered"],
+[class*="plugnmeet-branding"],
+a[href*="plugnmeet.com"],
+a[href*="plugnmeet.org"],
+a[href*="mynaparrot"] {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+}
+
+/* 4. CAMERA ORIENTATION (Fix Mirrored Camera on PC and Mobile) */
+/* Natural unmirrored mode by default so text, books, and assignments are readable */
+video.camera-video,
+.camera-video-player video,
+.video-camera-item video {
+    transform: scaleX(1) !important;
+    -webkit-transform: scaleX(1) !important;
+}
+
+/* Mirrored mode support when user toggles Flip Camera */
+body.mirrored-camera video.camera-video,
+body.mirrored-camera .camera-video-player video,
+body.mirrored-camera .video-camera-item video {
+    transform: scaleX(-1) !important;
+    -webkit-transform: scaleX(-1) !important;
+}

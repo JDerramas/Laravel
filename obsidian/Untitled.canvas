@@ -1,0 +1,166 @@
+{
+  "nodes": [
+    {
+      "id": "node-index",
+      "x": 0,
+      "y": 0,
+      "width": 360,
+      "height": 280,
+      "type": "file",
+      "file": "obsidian/NPC_ELMS_Brain_Index.md"
+    },
+    {
+      "id": "node-webrtc",
+      "x": -550,
+      "y": -350,
+      "width": 320,
+      "height": 240,
+      "type": "file",
+      "file": "obsidian/Virtual_Classroom_WebRTC.md"
+    },
+    {
+      "id": "node-gating",
+      "x": -920,
+      "y": -350,
+      "width": 300,
+      "height": 220,
+      "type": "file",
+      "file": "obsidian/Section_Gated_Access_Control.md"
+    },
+    {
+      "id": "node-teacher-ctrl",
+      "x": -750,
+      "y": -620,
+      "width": 300,
+      "height": 220,
+      "type": "file",
+      "file": "obsidian/Teacher_Session_Controller.md"
+    },
+    {
+      "id": "node-admin-audit",
+      "x": -350,
+      "y": -620,
+      "width": 300,
+      "height": 220,
+      "type": "file",
+      "file": "obsidian/Admin_Live_Audit_Center.md"
+    },
+    {
+      "id": "node-threejs",
+      "x": 480,
+      "y": -350,
+      "width": 320,
+      "height": 240,
+      "type": "file",
+      "file": "obsidian/ThreeJS_3D_Graphics_Engine.md"
+    },
+    {
+      "id": "node-ui",
+      "x": 860,
+      "y": -350,
+      "width": 300,
+      "height": 220,
+      "type": "file",
+      "file": "obsidian/UI_Design_System_and_Tailwind.md"
+    },
+    {
+      "id": "node-student",
+      "x": -850,
+      "y": 180,
+      "width": 300,
+      "height": 240,
+      "type": "file",
+      "file": "obsidian/Student_Portal_Architecture.md"
+    },
+    {
+      "id": "node-faculty",
+      "x": -500,
+      "y": 280,
+      "width": 300,
+      "height": 240,
+      "type": "file",
+      "file": "obsidian/Faculty_Portal_Architecture.md"
+    },
+    {
+      "id": "node-admin-hub",
+      "x": -150,
+      "y": 380,
+      "width": 300,
+      "height": 240,
+      "type": "file",
+      "file": "obsidian/Admin_Master_Hub.md"
+    },
+    {
+      "id": "node-coursework",
+      "x": -650,
+      "y": 560,
+      "width": 320,
+      "height": 240,
+      "type": "file",
+      "file": "obsidian/Coursework_and_Grading_Engine.md"
+    },
+    {
+      "id": "node-calendar",
+      "x": 200,
+      "y": 380,
+      "width": 280,
+      "height": 220,
+      "type": "file",
+      "file": "obsidian/Academic_Calendar_and_Events.md"
+    },
+    {
+      "id": "node-auth",
+      "x": 480,
+      "y": 80,
+      "width": 300,
+      "height": 220,
+      "type": "file",
+      "file": "obsidian/Authentication_and_Session_State.md"
+    },
+    {
+      "id": "node-security",
+      "x": 840,
+      "y": 80,
+      "width": 300,
+      "height": 220,
+      "type": "file",
+      "file": "obsidian/Security_and_Audit_Logging.md"
+    },
+    {
+      "id": "node-database",
+      "x": 550,
+      "y": 380,
+      "width": 300,
+      "height": 220,
+      "type": "file",
+      "file": "obsidian/Database_and_Storage_Architecture.md"
+    },
+    {
+      "id": "node-mobile",
+      "x": 880,
+      "y": 380,
+      "width": 300,
+      "height": 220,
+      "type": "file",
+      "file": "obsidian/Mobile_and_Remote_Tunneling.md"
+    }
+  ],
+  "edges": [
+    { "id": "e-idx-webrtc", "fromNode": "node-index", "fromSide": "left", "toNode": "node-webrtc", "toSide": "right" },
+    { "id": "e-webrtc-gating", "fromNode": "node-webrtc", "fromSide": "left", "toNode": "node-gating", "toSide": "right" },
+    { "id": "e-webrtc-teacher", "fromNode": "node-webrtc", "fromSide": "top", "toNode": "node-teacher-ctrl", "toSide": "bottom" },
+    { "id": "e-webrtc-admin", "fromNode": "node-webrtc", "fromSide": "top", "toNode": "node-admin-audit", "toSide": "bottom" },
+    { "id": "e-idx-threejs", "fromNode": "node-index", "fromSide": "right", "toNode": "node-threejs", "toSide": "left" },
+    { "id": "e-three-ui", "fromNode": "node-threejs", "fromSide": "right", "toNode": "node-ui", "toSide": "left" },
+    { "id": "e-idx-student", "fromNode": "node-index", "fromSide": "bottom", "toNode": "node-student", "toSide": "top" },
+    { "id": "e-idx-faculty", "fromNode": "node-index", "fromSide": "bottom", "toNode": "node-faculty", "toSide": "top" },
+    { "id": "e-idx-admin", "fromNode": "node-index", "fromSide": "bottom", "toNode": "node-admin-hub", "toSide": "top" },
+    { "id": "e-stu-cw", "fromNode": "node-student", "fromSide": "bottom", "toNode": "node-coursework", "toSide": "top" },
+    { "id": "e-fac-cw", "fromNode": "node-faculty", "fromSide": "bottom", "toNode": "node-coursework", "toSide": "top" },
+    { "id": "e-idx-auth", "fromNode": "node-index", "fromSide": "right", "toNode": "node-auth", "toSide": "left" },
+    { "id": "e-auth-sec", "fromNode": "node-auth", "fromSide": "right", "toNode": "node-security", "toSide": "left" },
+    { "id": "e-idx-db", "fromNode": "node-index", "fromSide": "bottom", "toNode": "node-database", "toSide": "top" },
+    { "id": "e-db-mob", "fromNode": "node-database", "fromSide": "right", "toNode": "node-mobile", "toSide": "left" },
+    { "id": "e-idx-cal", "fromNode": "node-index", "fromSide": "bottom", "toNode": "node-calendar", "toSide": "top" }
+  ]
+}

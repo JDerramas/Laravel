@@ -1,0 +1,221 @@
+        function renderTable() {
+            const tbody = document.getElementById('users-tbody');
+            const rows = filteredUsers();
+
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-10 text-center text-on-surface-variant">No accounts match your filters.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = rows.map((u, i) => {
+                const badge = ROLE_BADGE[u.role] || ROLE_BADGE.student;
+                const prot = isProtected(u.email);
+                const self = String(u.email || '').toLowerCase() === MY_EMAIL;
+                
+                const scholarTag = u.scholar_status === 'Scholar' 
+                    ? '<span class="ml-1 text-[10px] font-bold text-amber-600 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded">Scholar</span>' 
+                    : '';
+                const sub = u.role === 'student'
+                    ? `${esc(u.program || 'AIS')} · ${esc(u.section || '2A')}${scholarTag}`
+                    : esc(u.program || 'Faculty / Staff');
+
+                let statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Active</span>';
+                if (u.status === 'Banned') {
+                    statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-600 border border-rose-500/20 inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Banned</span>';
+                } else if (u.status === 'Restricted') {
+                    statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 border border-amber-500/20 inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Restricted</span>';
+                } else if (u.status === 'Snoozed' || u.is_active == 0) {
+                    statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-500/10 text-slate-500 border border-slate-500/20 inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Snoozed</span>';
+                }
+
+                const opts = ['student','teacher','admin'].map(r =>
+                    `<option value="${r}" ${r === u.role ? 'selected' : ''}>${ROLE_BADGE[r].label}</option>`).join('');
+
+                const isBanned = u.status === 'Banned';
+                const isRestricted = u.status === 'Restricted';
+                const isSnoozed = u.status === 'Snoozed' || u.is_active == 0;
+                const isActive = (u.status === 'Active' || !u.status) && u.is_active != 0;
+
+                return `
+                <tr class="hover:bg-surface-container-low/60 transition-colors user-row" data-search="${esc([u.full_name,u.email,u.student_number].join(' ').toLowerCase())}">
+                    <td class="py-3 px-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-xs shrink-0 npc-navy-card">${initials(u.full_name)}</div>
+                            <div>
+                                <p class="font-semibold text-on-surface leading-tight">${esc(u.full_name)}${self ? ' <span class=\"ml-1 text-[10px] font-mono text-status-success\">YOU</span>' : ''}${prot ? ' <span class=\"ml-1 text-[10px] font-mono text-error\">PROTECTED</span>' : ''}</p>
+                                <p class="text-[11px] font-mono text-on-surface-variant">${esc(u.student_number || 'STAFF')}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-6 font-mono text-xs text-on-surface-variant break-all">${esc(u.email)}</td>
+                    <td class="py-3 px-6 text-xs text-on-surface-variant font-medium">${sub}</td>
+                    <td class="py-3 px-6">
+                        <span class="npc-role-chip ${badge.cls}"><span class="material-symbols-outlined" style="font-size:13px;">${badge.icon}</span>${badge.label}</span>
+                    </td>
+                    <td class="py-3 px-6">
+                        ${statusBadge}
+                    </td>
+                    <td class="py-3 px-6 text-right">
+                        <div class="flex items-center justify-end gap-1.5">
+                        ${prot ? '<span class="text-[11px] font-mono text-outline">locked</span>' :
+                          `<!-- Role Change -->
+                           <select onchange="changeRole('${esc(u.id)}', this.value, '${esc(u.full_name)}')" ${self ? 'disabled title="You cannot change your own role"' : ''}
+                                   class="bg-surface border border-outline-variant rounded-lg text-xs font-semibold text-primary px-2 py-1.5 focus:outline-none focus:border-primary cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+                               ${opts}
+                           </select>
+                           <!-- Status Change (Active, Restrict, Ban, Snooze) -->
+                           <select onchange="setUserStatus('${esc(u.id)}', this.value, '${esc(u.full_name)}')" ${self ? 'disabled title="You cannot change your own status"' : ''}
+                                   class="bg-surface border border-outline-variant rounded-lg text-xs font-semibold text-on-surface px-2 py-1.5 focus:outline-none focus:border-primary cursor-pointer disabled:opacity-40">
+                               <option value="Active" ${isActive ? 'selected' : ''}>Active</option>
+                               <option value="Restricted" ${isRestricted ? 'selected' : ''}>Restrict</option>
+                               <option value="Snoozed" ${isSnoozed ? 'selected' : ''}>Snooze</option>
+                               <option value="Banned" ${isBanned ? 'selected' : ''}>Ban</option>
+                           </select>
+                           <!-- Delete Button -->
+                           ${self ? '' : `
+                           <button onclick="deleteAccount('${esc(u.id)}', '${esc(u.full_name)}', '${esc(u.email)}')"
+                                   class="p-1.5 rounded-lg border border-error/30 text-error hover:bg-error/10 transition-colors cursor-pointer"
+                                   title="Permanently Delete Account">
+                               <span class="material-symbols-outlined text-[16px]">delete</span>
+                           </button>
+                           `}
+                          `}
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function changeRole(id, newRole, name) {
+            if (!await npcConfirm({
+                title: 'Change User Role',
+                message: `Change role for ${name} to "${newRole.toUpperCase()}"?\nTheir portal access will switch in real time.`,
+                type: 'warning',
+                confirmText: 'Change Role'
+            })) {
+                loadUsers();
+                return;
+            }
+            try {
+                const res = await fetch('/api/admin.php?action=set_user_role', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF },
+                    body: JSON.stringify({ id, role: newRole })
+                });
+                const data = await res.json();
+                if (window.notify) window.notify(data.message || 'Role updated.', data.success ? 'success' : 'error');
+            } catch (err) {
+                if (window.notify) window.notify('Request failed: ' + err.message, 'error');
+            }
+            loadUsers();
+        }
+
+        async function setUserStatus(id, newStatus, name) {
+            if (!await npcConfirm({
+                title: `Set Account to ${newStatus}`,
+                message: `Are you sure you want to set the account of ${name} to "${newStatus}"?\n\n` +
+                         (newStatus === 'Active' ? 'The user will have normal access.' : 'The user will be immediately blocked or restricted from portal access in real time.'),
+                type: newStatus === 'Active' ? 'info' : (newStatus === 'Banned' ? 'danger' : 'warning'),
+                confirmText: `Set as ${newStatus}`
+            })) {
+                loadUsers();
+                return;
+            }
+            try {
+                const res = await fetch('/api/admin.php?action=set_user_status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF },
+                    body: JSON.stringify({ id, status: newStatus })
+                });
+                const data = await res.json();
+                if (window.notify) window.notify(data.message || 'Status updated.', data.success ? 'success' : 'error');
+            } catch (err) {
+                if (window.notify) window.notify('Request failed: ' + err.message, 'error');
+            }
+            loadUsers();
+        }
+
+        async function deleteAccount(id, name, email) {
+            if (!await npcConfirm({
+                title: 'Delete User Account',
+                message: `Permanently delete account for ${name} (${email})?\n\nThis cannot be undone. Active sessions will be terminated immediately in real time.`,
+                type: 'danger',
+                confirmText: 'Delete Permanently'
+            })) return;
+
+            try {
+                const res = await fetch('/api/admin.php?action=delete_user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF },
+                    body: JSON.stringify({ id })
+                });
+                const data = await res.json();
+                if (window.notify) window.notify(data.message || 'Account deleted.', data.success ? 'success' : 'error');
+            } catch (err) {
+                if (window.notify) window.notify('Delete failed: ' + err.message, 'error');
+            }
+            loadUsers();
+        }
+
+        /* ── Filters ───────────────────────────────────────── */
+        document.querySelectorAll('.role-stat').forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterRole = btn.getAttribute('data-filter-role');
+                document.querySelectorAll('.role-stat').forEach(b =>
+                    b.classList.toggle('ring-2', b === btn) || b.classList.toggle('ring-primary', b === btn));
+                renderTable();
+            });
+        });
+        document.getElementById('user-search').addEventListener('input', e => {
+            searchText = e.target.value;
+            renderTable();
+        });
+
+        /* ── Add-account modal ─────────────────────────────── */
+        const modal = document.getElementById('add-user-modal');
+        const roleHint = document.getElementById('role-hint');
+        const HINTS = {
+            student: 'Students see schedules, grades, QR attendance, profile and the campus AI.',
+            teacher: 'Teachers get the Faculty portal: classes, attendance QR, grade encoding and tools.',
+            admin:   'Admins get full control: every portal, academic records, security, user management.'
+        };
+
+        function openModal() {
+            modal.classList.remove('hidden');
+            updateHints();
+            setTimeout(() => document.getElementById('nu-name').focus(), 60);
+        }
+        function closeModal() { modal.classList.add('hidden'); }
+        function updateHints() {
+            const sel = document.querySelector('input[name="new-role"]:checked').value;
+            roleHint.textContent = HINTS[sel];
+            document.getElementById('student-fields').classList.toggle('hidden', sel !== 'student');
+            document.getElementById('staff-fields').classList.toggle('hidden', sel === 'student');
+        }
+        document.getElementById('role-picker').addEventListener('change', updateHints);
+        document.getElementById('btn-add-user').addEventListener('click', openModal);
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+        document.getElementById('modal-cancel').addEventListener('click', closeModal);
+        modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+        /* ── Submit create ─────────────────────────────────── */
+        document.getElementById('add-user-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-create');
+            const role = document.querySelector('input[name="new-role"]:checked').value;
+
+            const emailVal = document.getElementById('nu-email').value.trim().toLowerCase();
+            const payload = {
+                role,
+                full_name: document.getElementById('nu-name').value.trim(),
+                email: emailVal,
+                number: document.getElementById('nu-number').value.trim(),
+                program: role === 'student' ? document.getElementById('nu-program').value.trim()
+                                            : document.getElementById('nu-dept').value.trim(),
+                section: role === 'student' ? document.getElementById('nu-section').value.trim() : 'TBA',
+                scholar_status: role === 'student' ? document.getElementById('nu-scholar').value : 'Non-Scholar'
+            };
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined text-[17px] animate-spin">progress_activity</span> Creating…';

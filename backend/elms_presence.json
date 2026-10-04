@@ -1,0 +1,208 @@
+{
+    "TEST-GMEET-SESSION-1789071826": {
+        "2024-00192": {
+            "student_number": "2024-00192",
+            "student_name": "Lovi Student",
+            "student_email": "student2024001@navotaspolytechniccollege.edu.ph",
+            "session_code": "TEST-GMEET-SESSION-1789071826",
+            "status": "present",
+            "is_online": true,
+            "accumulated_seconds": 5,
+            "current_join_ts": 1789071832,
+            "last_joined_at": "2026-09-11T04:23:52+08:00",
+            "last_heartbeat": 1789071832,
+            "last_left_at": "2026-09-11T04:23:52+08:00",
+            "leave_count": 1,
+            "check_in_at": "2026-09-11T04:23:47+08:00",
+            "verified_via": "plugnmeet_verified"
+        }
+    },
+    "NPC-AIS201-2026-09-11": {
+        "2024-00192": {
+            "student_number": "2024-00192",
+            "student_name": "Lovi Student",
+            "student_email": "student2024001@navotaspolytechniccollege.edu.ph",
+            "session_code": "NPC-AIS201-2026-09-11",
+            "status": "present",
+            "is_online": false,
+            "accumulated_seconds": 123,
+            "current_join_ts": 1789129430,
+            "last_joined_at": "2026-09-11T20:23:50+08:00",
+            "last_heartbeat": 1789129434,
+            "last_left_at": "2026-09-11T20:23:55+08:00",
+            "leave_count": 14,
+            "check_in_at": "2026-09-11T04:36:19+08:00",
+            "verified_via": "plugnmeet_verified"
+        },
+        "220755": {
+            "student_number": "220755",
+            "student_name": "KYLELOUIE DERRAMAS",
+            "student_email": "kderramas220755@navotaspolytechniccollege.edu.ph",
+            "session_code": "NPC-AIS201-2026-09-11",
+            "status": "present",
+            "is_online": false,
+            "accumulated_seconds": 119,
+            "current_join_ts": 1789120999,
+            "last_joined_at": "2026-09-11T18:03:19+08:00",
+            "last_heartbeat": 1789121027,
+            "last_left_at": "2026-09-11T18:03:47+08:00",
+            "leave_count": 10,
+            "check_in_at": "2026-09-11T17:35:04+08:00",
+            "verified_via": "plugnmeet_verified"
+        }
+    },
+    "NPC-IS204-2026-09-11": {
+        "220755": {
+            "student_number": "220755",
+            "student_name": "KYLELOUIE DERRAMAS",
+            "student_email": "kderramas220755@navotaspolytechniccollege.edu.ph",
+            "session_code": "NPC-IS204-2026-09-11",
+            "status": "present",
+            "is_online": false,
+            "accumulated_seconds": 1,
+            "current_join_ts": 1789127534,
+            "last_joined_at": "2026-09-11T19:52:14+08:00",
+            "last_heartbeat": 1789127534,
+            "last_left_at": "2026-09-11T19:52:15+08:00",
+            "leave_count": 1,
+            "check_in_at": "2026-09-11T19:52:01+08:00",
+            "verified_via": "plugnmeet_verified"
+        }
+    },
+    "NPC-AIS201-2026-09-12": {
+        "2024-00192": {
+            "student_number": "2024-00192",
+            "student_name": "Administrator",
+            "student_email": "2024-00192@navotaspolytechniccollege.edu.ph",
+            "session_code": "NPC-AIS201-2026-09-12",
+            "status": "present",
+            "is_online": true,
+            "accumulated_seconds": 324,
+            "current_join_ts": 1789156291,
+            "last_joined_at": "2026-09-12T03:44:53+08:00",
+            "last_heartbeat": 1789156291,
+            "last_left_at": "2026-09-12T03:51:31+08:00",
+            "leave_count": 9,
+            "check_in_at": "2026-09-12T02:00:24+08:00",
+            "verified_via": "plugnmeet_verified"
+        },
+        "2024001": {
+            "student_number": "2024001",
+            "student_name": "Lovi Student",
+            "student_email": "student2024001@navotaspolytechniccollege.edu.ph",
+            "session_code": "NPC-AIS201-2026-09-12",
+            "status": "present",
+            "is_online": true,
+            "accumulated_seconds": 2323,
+            "current_join_ts": 1789157604,
+            "last_joined_at": "2026-09-12T04:13:24+08:00",
+            "last_heartbeat": 1789157747,
+            "last_left_at": "2026-09-12T03:51:28+08:00",
+            "leave_count": 22,
+            "check_in_at": "2026-09-12T03:02:25+08:00",
+            "verified_via": "plugnmeet_verified"
+        },
+        "N/A": {
+            "student_number": "N/A",
+            "student_name": "Administrator",
+            "student_email": "admin@navotaspolytechniccollege.edu.ph",
+            "session_code": "NPC-AIS201-2026-09-12",
+            "status": "present",
+            "is_online": false,
+            "accumulated_seconds": 816,
+            "current_join_ts": 1789155761,
+            "last_joined_at": "2026-09-12T03:42:41+08:00",
+            "last_heartbeat": 1789156241,
+            "last_left_at": "2026-09-12T03:50:42+08:00",
+            "leave_count": 3,
+            "check_in_at": "2026-09-12T03:26:45+08:00",
+            "verified_via": "plugnmeet_verified"
+        }
+    },
+    "NPC-AIS201-2026-09-18": {
+        "2024-00192": {
+            "student_number": "2024-00192",
+            "student_name": "Lovi Student",
+            "student_email": "student2024001@navotaspolytechniccollege.edu.ph",
+            "session_code": "NPC-AIS201-2026-09-18",
+            "status": "present",
+            "is_online": false,
+            "accumulated_seconds": 2,
+            "current_join_ts": 1789672745,
+            "last_joined_at": "2026-09-18T03:19:05+08:00",
+            "last_heartbeat": 1789672745,
+            "last_left_at": "2026-09-18T03:19:05+08:00",
+            "leave_count": 2,
+            "check_in_at": "2026-09-18T03:19:03+08:00",
+            "verified_via": "plugnmeet_verified"
+        }
+    },
+    "NPC-ADV02-2026-09-27": {
+        "2026-88393": {
+            "student_number": "2026-88393",
+            "student_name": "Hernal Rose",
+            "student_email": "hernalrose5@gmail.com",
+            "session_code": "NPC-ADV02-2026-09-27",
+            "status": "present",
+            "is_online": false,
+            "accumulated_seconds": 100,
+            "current_join_ts": 1790507806,
+            "last_joined_at": "2026-09-27T11:16:46+00:00",
+            "last_heartbeat": 1790507806,
+            "last_left_at": "2026-09-27T11:16:46+00:00",
+            "leave_count": 4,
+            "check_in_at": "2026-09-27T11:15:03+00:00",
+            "verified_via": "plugnmeet_verified"
+        },
+        "251684": {
+            "student_number": "251684",
+            "student_name": "ARNIELYN SENITA",
+            "student_email": "asenita251684@navotaspolytechniccollege.edu.ph",
+            "session_code": "NPC-ADV02-2026-09-27",
+            "status": "present",
+            "is_online": false,
+            "accumulated_seconds": 51,
+            "current_join_ts": 1790509859,
+            "last_joined_at": "2026-09-27T11:50:59+00:00",
+            "last_heartbeat": 1790509890,
+            "last_left_at": "2026-09-27T11:51:30+00:00",
+            "leave_count": 4,
+            "check_in_at": "2026-09-27T11:48:19+00:00",
+            "verified_via": "plugnmeet_verified"
+        },
+        "251505": {
+            "student_number": "251505",
+            "student_name": "JILO DERRAMAS",
+            "student_email": "jderramas251505@navotaspolytechniccollege.edu.ph",
+            "session_code": "NPC-ADV02-2026-09-27",
+            "status": "present",
+            "is_online": false,
+            "accumulated_seconds": 1529,
+            "current_join_ts": 1790513129,
+            "last_joined_at": "2026-09-27T12:45:29+00:00",
+            "last_heartbeat": 1790513885,
+            "last_left_at": "2026-09-27T12:58:05+00:00",
+            "leave_count": 5,
+            "check_in_at": "2026-09-27T11:50:05+00:00",
+            "verified_via": "plugnmeet_verified"
+        }
+    },
+    "NPC-IT101-2026-09-30": {
+        "251505": {
+            "student_number": "251505",
+            "student_name": "Jilo Derramas",
+            "student_email": "jderramas251505@navotaspolytechniccollege.edu.ph",
+            "session_code": "NPC-IT101-2026-09-30",
+            "status": "present",
+            "is_online": true,
+            "accumulated_seconds": 0,
+            "current_join_ts": 1790803019,
+            "last_joined_at": "2026-09-30T21:16:59+00:00",
+            "last_heartbeat": 1790803019,
+            "last_left_at": null,
+            "leave_count": 0,
+            "check_in_at": "2026-09-30T21:00:04+00:00",
+            "verified_via": "plugnmeet_verified"
+        }
+    }
+}

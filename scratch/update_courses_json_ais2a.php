@@ -1,0 +1,313 @@
+<?php
+$coursesData = [
+    [
+        "id" => "crs-ais-dm103",
+        "code" => "DM103",
+        "title" => "BUSINESS PROCESS MANAGEMENT",
+        "program" => "AIS",
+        "section" => "2A",
+        "instructor" => "CASTILLO, RODERICK",
+        "instructor_email" => "roderick.castillo@navotaspolytechniccollege.edu.ph",
+        "schedule" => "Sat · 07:00 AM – 10:00 AM",
+        "room" => "TBA / Synchronous",
+        "progress" => 50,
+        "modules" => [
+            [
+                "id" => "mod-dm103-1",
+                "title" => "Module 1: Principles of Business Process Management & Lifecycle",
+                "file_name" => "DM103_Module_1_BPM_Principles.pdf",
+                "type" => "pdf",
+                "size" => "2.5 MB",
+                "date" => "2026-09-02",
+                "uploaded_by" => "roderick.castillo@navotaspolytechniccollege.edu.ph"
+            ]
+        ],
+        "assignments" => [
+            [
+                "id" => "asg-dm103-1",
+                "title" => "Case Study: As-Is vs To-Be Process Mapping",
+                "instructions" => "Document the organizational order workflow and propose an optimized To-Be model.",
+                "due_date" => "2026-10-05 23:59",
+                "points" => 100,
+                "created_at" => "2026-09-10"
+            ]
+        ],
+        "meeting_link" => "/live_room.php?course_code=DM103&room_id=NPC-ELMS-DM103"
+    ],
+    [
+        "id" => "crs-ais-cc107",
+        "code" => "CC107",
+        "title" => "COMPUTER PROGRAMMING 3",
+        "program" => "AIS",
+        "section" => "2A",
+        "instructor" => "MORENO, EDSAN",
+        "instructor_email" => "edsan.moreno@navotaspolytechniccollege.edu.ph",
+        "schedule" => "Mon · 02:00 PM – 05:00 PM",
+        "room" => "IT Lab / Synchronous",
+        "progress" => 60,
+        "modules" => [
+            [
+                "id" => "mod-cc107-1",
+                "title" => "Module 1: Advanced Object-Oriented Design & Design Patterns",
+                "file_name" => "CC107_Module_1_OOP_Design.pdf",
+                "type" => "pdf",
+                "size" => "3.1 MB",
+                "date" => "2026-09-02",
+                "uploaded_by" => "edsan.moreno@navotaspolytechniccollege.edu.ph"
+            ]
+        ],
+        "assignments" => [
+            [
+                "id" => "asg-cc107-1",
+                "title" => "Laboratory Exercise 1: MVC Pattern Implementation",
+                "instructions" => "Implement a decoupled model-view-controller student registry in PHP/Java.",
+                "due_date" => "2026-10-06 23:59",
+                "points" => 100,
+                "created_at" => "2026-09-10"
+            ]
+        ],
+        "meeting_link" => "/live_room.php?course_code=CC107&room_id=NPC-ELMS-CC107"
+    ],
+    [
+        "id" => "crs-ais-pathfit3",
+        "code" => "PATHFIT 3",
+        "title" => "DANCE",
+        "program" => "AIS",
+        "section" => "2A",
+        "instructor" => "COSMIANO, ERNIFER",
+        "instructor_email" => "ernifer.cosmiano@navotaspolytechniccollege.edu.ph",
+        "schedule" => "Sat · 05:00 PM – 07:00 PM",
+        "room" => "NPC Gymnasium / Hybrid",
+        "progress" => 40,
+        "modules" => [
+            [
+                "id" => "mod-pathfit-1",
+                "title" => "Module 1: Rhythmic Activities & Contemporary Movement Fundamentals",
+                "file_name" => "PATHFIT3_Module_1_Rhythmics.pdf",
+                "type" => "pdf",
+                "size" => "1.8 MB",
+                "date" => "2026-09-02",
+                "uploaded_by" => "ernifer.cosmiano@navotaspolytechniccollege.edu.ph"
+            ]
+        ],
+        "assignments" => [
+            [
+                "id" => "asg-pathfit-1",
+                "title" => "Practical Assessment 1: Synchronized Dance Routine Video",
+                "instructions" => "Submit a 2-minute video execution of the rhythmic movement pattern.",
+                "due_date" => "2026-10-07 23:59",
+                "points" => 50,
+                "created_at" => "2026-09-10"
+            ]
+        ],
+        "meeting_link" => "/live_room.php?course_code=PATHFIT3&room_id=NPC-ELMS-PATHFIT3"
+    ],
+    [
+        "id" => "crs-ais-is105",
+        "code" => "IS105",
+        "title" => "ENTERPRISE ARCHITECTURE",
+        "program" => "AIS",
+        "section" => "2A",
+        "instructor" => "DADOR, FREDERICK",
+        "instructor_email" => "frederick.dador@navotaspolytechniccollege.edu.ph",
+        "schedule" => "Sat · 10:30 AM – 01:30 PM",
+        "room" => "TBA / Synchronous",
+        "progress" => 55,
+        "modules" => [
+            [
+                "id" => "mod-is105-1",
+                "title" => "Module 1: TOGAF Architecture Development Method & Layering",
+                "file_name" => "IS105_Module_1_TOGAF_ADM.pdf",
+                "type" => "pdf",
+                "size" => "4.2 MB",
+                "date" => "2026-09-02",
+                "uploaded_by" => "frederick.dador@navotaspolytechniccollege.edu.ph"
+            ]
+        ],
+        "assignments" => [
+            [
+                "id" => "asg-is105-1",
+                "title" => "Milestone 1: Architectural Vision Document",
+                "instructions" => "Formulate the Architecture Vision and stakeholder map for the campus ERP.",
+                "due_date" => "2026-10-08 23:59",
+                "points" => 100,
+                "created_at" => "2026-09-10"
+            ]
+        ],
+        "meeting_link" => "/live_room.php?course_code=IS105&room_id=NPC-ELMS-IS105"
+    ],
+    [
+        "id" => "crs-ais-dm102",
+        "code" => "DM102",
+        "title" => "FINANCIAL MANAGEMENT",
+        "program" => "AIS",
+        "section" => "2A",
+        "instructor" => "BORJA, MARIVIC",
+        "instructor_email" => "MARIVIC.BORJA@navotaspolytechniccollege.edu.ph",
+        "schedule" => "Tue · 05:30 PM – 08:30 PM",
+        "room" => "TBA / Synchronous",
+        "progress" => 45,
+        "modules" => [
+            [
+                "id" => "mod-dm102-1",
+                "title" => "Module 1: Time Value of Money & Capital Budgeting Techniques",
+                "file_name" => "DM102_Module_1_Time_Value.pdf",
+                "type" => "pdf",
+                "size" => "2.9 MB",
+                "date" => "2026-09-02",
+                "uploaded_by" => "MARIVIC.BORJA@navotaspolytechniccollege.edu.ph"
+            ]
+        ],
+        "assignments" => [
+            [
+                "id" => "asg-dm102-1",
+                "title" => "Problem Set: Net Present Value (NPV) & Internal Rate of Return (IRR)",
+                "instructions" => "Solve capital budgeting cases and evaluate investment feasibility.",
+                "due_date" => "2026-10-09 23:59",
+                "points" => 100,
+                "created_at" => "2026-09-10"
+            ]
+        ],
+        "meeting_link" => "/live_room.php?course_code=DM102&room_id=NPC-ELMS-DM102"
+    ],
+    [
+        "id" => "crs-ais-adv02",
+        "code" => "ADV02",
+        "title" => "HUMAN COMPUTER INTERACTION",
+        "program" => "AIS",
+        "section" => "2A",
+        "instructor" => "MORENO, EDSAN",
+        "instructor_email" => "edsan.moreno@navotaspolytechniccollege.edu.ph",
+        "schedule" => "Mon · 05:30 PM – 08:30 PM",
+        "room" => "TBA / Synchronous",
+        "progress" => 50,
+        "modules" => [
+            [
+                "id" => "mod-adv02-1",
+                "title" => "Module 1: User Experience Foundations & Heuristic Evaluation",
+                "file_name" => "ADV02_Module_1_UX_Heuristics.pdf",
+                "type" => "pdf",
+                "size" => "3.6 MB",
+                "date" => "2026-09-02",
+                "uploaded_by" => "edsan.moreno@navotaspolytechniccollege.edu.ph"
+            ]
+        ],
+        "assignments" => [
+            [
+                "id" => "asg-adv02-1",
+                "title" => "UI Audit: Nielsen Norman Heuristics on Campus Portal",
+                "instructions" => "Perform an audit and deliver wireframe improvements in Figma.",
+                "due_date" => "2026-10-10 23:59",
+                "points" => 100,
+                "created_at" => "2026-09-10"
+            ]
+        ],
+        "meeting_link" => "/live_room.php?course_code=ADV02&room_id=NPC-ELMS-ADV02"
+    ],
+    [
+        "id" => "crs-ais-adv04",
+        "code" => "ADV04",
+        "title" => "IS INNOVATIONS AND NEW TECHNOLOGIES",
+        "program" => "AIS",
+        "section" => "2A",
+        "instructor" => "KU, JAN VINCENT",
+        "instructor_email" => "jvku@navotaspolytechniccollege.edu.ph",
+        "schedule" => "Sat · 02:00 PM – 05:00 PM",
+        "room" => "TBA / Synchronous",
+        "progress" => 60,
+        "modules" => [
+            [
+                "id" => "mod-adv04-1",
+                "title" => "Module 1: Cloud Computing Paradigms, AI Agents & Edge Infrastructure",
+                "file_name" => "ADV04_Module_1_Innovations.pdf",
+                "type" => "pdf",
+                "size" => "4.1 MB",
+                "date" => "2026-09-02",
+                "uploaded_by" => "jvku@navotaspolytechniccollege.edu.ph"
+            ]
+        ],
+        "assignments" => [
+            [
+                "id" => "asg-adv04-1",
+                "title" => "Research Proposal: Enterprise Generative AI Implementation",
+                "instructions" => "Draft a 4-page whitepaper proposing an autonomous agent workflow.",
+                "due_date" => "2026-10-11 23:59",
+                "points" => 100,
+                "created_at" => "2026-09-10"
+            ]
+        ],
+        "meeting_link" => "/live_room.php?course_code=ADV04&room_id=NPC-ELMS-ADV04"
+    ],
+    [
+        "id" => "crs-ais-quameth",
+        "code" => "QUAMETH",
+        "title" => "QUANTITATIVE METHODS",
+        "program" => "AIS",
+        "section" => "2A",
+        "instructor" => "KU, JAN VINCENT",
+        "instructor_email" => "jvku@navotaspolytechniccollege.edu.ph",
+        "schedule" => "Fri · 02:00 PM – 05:00 PM",
+        "room" => "TBA / Synchronous",
+        "progress" => 55,
+        "modules" => [
+            [
+                "id" => "mod-quameth-1",
+                "title" => "Module 1: Linear Programming & Simplex Method Optimization",
+                "file_name" => "QUAMETH_Module_1_Linear_Programming.pdf",
+                "type" => "pdf",
+                "size" => "2.7 MB",
+                "date" => "2026-09-02",
+                "uploaded_by" => "jvku@navotaspolytechniccollege.edu.ph"
+            ]
+        ],
+        "assignments" => [
+            [
+                "id" => "asg-quameth-1",
+                "title" => "Problem Set: Resource Allocation with Sensitivity Analysis",
+                "instructions" => "Solve optimal supply-chain dispatch matrices and report dual values.",
+                "due_date" => "2026-10-12 23:59",
+                "points" => 100,
+                "created_at" => "2026-09-10"
+            ]
+        ],
+        "meeting_link" => "/live_room.php?course_code=QUAMETH&room_id=NPC-ELMS-QUAMETH"
+    ],
+    [
+        "id" => "crs-ais-adv03",
+        "code" => "ADV03",
+        "title" => "TECHNOPRENEURSHIP",
+        "program" => "AIS",
+        "section" => "2A",
+        "instructor" => "BINAVICE, CHARLIE",
+        "instructor_email" => "oict.binavicecharlie@navotaspolytechniccollege.edu.ph",
+        "schedule" => "Thu · 05:30 PM – 08:30 PM",
+        "room" => "TBA / Synchronous",
+        "progress" => 40,
+        "modules" => [
+            [
+                "id" => "mod-adv03-1",
+                "title" => "Module 1: Startup Business Model Canvas & Customer Discovery",
+                "file_name" => "ADV03_Module_1_Technopreneurship.pdf",
+                "type" => "pdf",
+                "size" => "3.4 MB",
+                "date" => "2026-09-02",
+                "uploaded_by" => "oict.binavicecharlie@navotaspolytechniccollege.edu.ph"
+            ]
+        ],
+        "assignments" => [
+            [
+                "id" => "asg-adv03-1",
+                "title" => "Pitch Deck: Minimum Viable Product (MVP) Blueprint",
+                "instructions" => "Present your tech startup value proposition, TAM, and financial runway.",
+                "due_date" => "2026-10-13 23:59",
+                "points" => 100,
+                "created_at" => "2026-09-10"
+            ]
+        ],
+        "meeting_link" => "/live_room.php?course_code=ADV03&room_id=NPC-ELMS-ADV03"
+    ]
+];
+
+$file = dirname(__DIR__) . '/backend/elms_courses.json';
+file_put_contents($file, json_encode(['courses' => $coursesData], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+echo "Successfully updated backend/elms_courses.json with 9 AIS 2A subjects!\n";
