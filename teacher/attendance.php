@@ -19,7 +19,7 @@ $csrf_token = getCsrfToken();
     <!-- Tailwind CSS CDN -->
     <script>
         /* Pre-paint theme: apply saved night-mode before first paint (no flash) */
-        (function () {
+        (function() {
             try {
                 var t = localStorage.getItem('npc-theme');
                 if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -104,13 +104,17 @@ $csrf_token = getCsrfToken();
     </script>
     <!-- QRCode.js library for 100% reliable local client-side QR generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>    <script id="npc-role-meta" type="application/json"><?= json_encode(['role' => $_SESSION['role'] ?? 'student', 'email' => $_SESSION['email'] ?? '', 'name' => $_SESSION['name'] ?? '']) ?></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script id="npc-role-meta" type="application/json">
+        <?= json_encode(['role' => $_SESSION['role'] ?? 'student', 'email' => $_SESSION['email'] ?? '', 'name' => $_SESSION['name'] ?? '']) ?>
+    </script>
 </head>
 
 <body class="bg-surface text-on-surface font-sans min-h-screen flex antialiased">
     <?php include __DIR__ . '/../includes/_denied_banner.php'; ?>
     <!-- SideNavBar Desktop -->
-    <?php $NPC_PORTAL = 'faculty'; include __DIR__ . '/../includes/_sidebar.php'; ?>
+    <?php $NPC_PORTAL = 'faculty';
+    include __DIR__ . '/../includes/_sidebar.php'; ?>
 
     <!-- Main Content Area -->
     <main class="flex-1 lg:ml-64 bg-surface min-h-screen flex flex-col overflow-x-hidden">
@@ -141,7 +145,7 @@ $csrf_token = getCsrfToken();
 
         <!-- Canvas Container -->
         <div class="p-3.5 sm:p-6 md:p-10 max-w-7xl w-full mx-auto space-y-6 flex-1 flex flex-col">
-            
+
             <!-- 📌 1. INITIAL STATE: NO SUBJECT SELECTED VIEW -->
             <div id="no-subject-selected-view" class="hidden flex-col items-center justify-center p-12 bg-surface-container-lowest border border-outline-variant rounded-3xl shadow-sm text-center">
                 <div class="w-20 h-20 rounded-3xl bg-primary/10 text-primary flex items-center justify-center mb-4">
@@ -160,7 +164,7 @@ $csrf_token = getCsrfToken();
 
             <!-- 📌 2. SUBJECT SELECTED VIEW (Header Overview Card) -->
             <div id="subject-active-view" class="space-y-6">
-                
+
                 <!-- Class Header Banner -->
                 <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div class="flex-1">
@@ -260,15 +264,15 @@ $csrf_token = getCsrfToken();
 
                 <!-- 📌 4. ACTIVE LIVE ATTENDANCE SESSION CONTAINER (Revealed on Start) -->
                 <div id="active-session-container" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    
+
                     <!-- Left: Interactive Live QR Code Panel (5 cols) -->
                     <div class="lg:col-span-5 flex flex-col gap-4">
                         <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
-                            
+
                             <!-- Session Phase Indicator Banner -->
                             <div class="flex items-center justify-between w-full mb-3">
                                 <span id="session-phase-badge" class="px-3 py-1 bg-status-success/15 text-status-success text-xs font-bold rounded-full flex items-center gap-1.5 shadow-xs">
-                                    <span class="w-2 h-2 rounded-full bg-status-success animate-ping"></span> 
+                                    <span class="w-2 h-2 rounded-full bg-status-success animate-ping"></span>
                                     <span id="session-phase-text">ON-TIME WINDOW (PRESENT)</span>
                                 </span>
                                 <span class="text-[11px] font-mono text-on-surface-variant font-bold" id="rotation-status-badge">Auto-Rotating</span>
@@ -360,7 +364,24 @@ $csrf_token = getCsrfToken();
                                     </tr>
                                 </thead>
                                 <tbody id="roster-tbody" class="divide-y divide-outline-variant/30 font-medium">
-                                    <tr><td colspan="8"><div class="npc-skeleton-group py-2" aria-busy="true"><div class="sk-table-row"><div class="skeleton sk-line" style="margin-bottom:0"></div><div class="skeleton sk-line w-3/4" style="margin-bottom:0"></div><div class="skeleton sk-chip"></div><div class="skeleton sk-chip" style="width:2.5rem;margin-left:auto"></div></div><div class="sk-table-row" style="padding-bottom:0"><div class="skeleton sk-line" style="margin-bottom:0"></div><div class="skeleton sk-line w-2/3" style="margin-bottom:0"></div><div class="skeleton sk-chip"></div><div class="skeleton sk-chip" style="width:2.5rem;margin-left:auto"></div></div></div></td></tr>
+                                    <tr>
+                                        <td colspan="8">
+                                            <div class="npc-skeleton-group py-2" aria-busy="true">
+                                                <div class="sk-table-row">
+                                                    <div class="skeleton sk-line" style="margin-bottom:0"></div>
+                                                    <div class="skeleton sk-line w-3/4" style="margin-bottom:0"></div>
+                                                    <div class="skeleton sk-chip"></div>
+                                                    <div class="skeleton sk-chip" style="width:2.5rem;margin-left:auto"></div>
+                                                </div>
+                                                <div class="sk-table-row" style="padding-bottom:0">
+                                                    <div class="skeleton sk-line" style="margin-bottom:0"></div>
+                                                    <div class="skeleton sk-line w-2/3" style="margin-bottom:0"></div>
+                                                    <div class="skeleton sk-chip"></div>
+                                                    <div class="skeleton sk-chip" style="width:2.5rem;margin-left:auto"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -386,8 +407,20 @@ $csrf_token = getCsrfToken();
                 </div>
                 <div id="excuses-review-list" class="divide-y divide-outline-variant/40 max-h-80 overflow-y-auto custom-scroll">
                     <div class="npc-skeleton-group p-4" aria-busy="true">
-                        <div class="sk-row"><div class="skeleton sk-avatar"></div><div class="flex-1 min-w-0"><div class="skeleton sk-line w-2/3"></div><div class="skeleton sk-line w-1/2" style="margin-bottom:0"></div></div></div>
-                        <div class="sk-row" style="padding-bottom:0"><div class="skeleton sk-avatar"></div><div class="flex-1 min-w-0"><div class="skeleton sk-line w-3/4"></div><div class="skeleton sk-line w-1/2" style="margin-bottom:0"></div></div></div>
+                        <div class="sk-row">
+                            <div class="skeleton sk-avatar"></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="skeleton sk-line w-2/3"></div>
+                                <div class="skeleton sk-line w-1/2" style="margin-bottom:0"></div>
+                            </div>
+                        </div>
+                        <div class="sk-row" style="padding-bottom:0">
+                            <div class="skeleton sk-avatar"></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="skeleton sk-line w-3/4"></div>
+                                <div class="skeleton sk-line w-1/2" style="margin-bottom:0"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -451,7 +484,7 @@ $csrf_token = getCsrfToken();
         let isSessionActive = false;
         let sessionStartTime = 0;
         let presentDurationSeconds = 600; // 10 mins
-        let lateDurationSeconds = 300;    // 5 mins
+        let lateDurationSeconds = 300; // 5 mins
         let totalSessionDuration = 900;
         let currentPhase = 'present'; // 'present' | 'late' | 'expired'
         let secondsRemaining = 600;
@@ -461,9 +494,17 @@ $csrf_token = getCsrfToken();
 
         // Helper: Last Name First Formatting & Sorting
         function parseName(fullName) {
-            if (!fullName || typeof fullName !== 'string') return { lastName: '', firstName: '', formatted: '' };
+            if (!fullName || typeof fullName !== 'string') return {
+                lastName: '',
+                firstName: '',
+                formatted: ''
+            };
             const clean = fullName.trim();
-            if (!clean) return { lastName: '', firstName: '', formatted: '' };
+            if (!clean) return {
+                lastName: '',
+                firstName: '',
+                formatted: ''
+            };
 
             if (clean.includes(',')) {
                 const parts = clean.split(',').map(s => s.trim());
@@ -476,7 +517,11 @@ $csrf_token = getCsrfToken();
 
             const tokens = clean.split(/\s+/);
             if (tokens.length === 1) {
-                return { lastName: tokens[0], firstName: '', formatted: tokens[0] };
+                return {
+                    lastName: tokens[0],
+                    firstName: '',
+                    formatted: tokens[0]
+                };
             }
 
             const suffixes = ['jr', 'jr.', 'sr', 'sr.', 'ii', 'iii', 'iv', 'v'];
@@ -503,7 +548,11 @@ $csrf_token = getCsrfToken();
             }
 
             const formatted = `${lastName.toUpperCase()}, ${firstName.toUpperCase()}`;
-            return { lastName, firstName, formatted };
+            return {
+                lastName,
+                firstName,
+                formatted
+            };
         }
 
         function formatLastNameFirst(name) {
@@ -513,9 +562,13 @@ $csrf_token = getCsrfToken();
         function compareByLastName(aName, bName) {
             const a = parseName(aName);
             const b = parseName(bName);
-            const cmp = a.lastName.localeCompare(b.lastName, undefined, { sensitivity: 'base' });
+            const cmp = a.lastName.localeCompare(b.lastName, undefined, {
+                sensitivity: 'base'
+            });
             if (cmp !== 0) return cmp;
-            return a.firstName.localeCompare(b.firstName, undefined, { sensitivity: 'base' });
+            return a.firstName.localeCompare(b.firstName, undefined, {
+                sensitivity: 'base'
+            });
         }
 
         // Initialize Attendance Application
@@ -591,7 +644,7 @@ $csrf_token = getCsrfToken();
 
             // Populate Top Dropdown
             const select = document.getElementById('active-class-select');
-            select.innerHTML = '<option value="">Select a subject...</option>' + 
+            select.innerHTML = '<option value="">Select a subject...</option>' +
                 activeClasses.map(c => `<option value="${c.id}">${c.code} - ${c.title} (${c.section || 'AIS 2A'})</option>`).join('');
 
             // Populate Subject Selection Cards Grid
@@ -684,7 +737,7 @@ $csrf_token = getCsrfToken();
             document.getElementById('banner-class-schedule').innerText = `${currentClass.schedule_day || 'TBA'} (${currentClass.start_time || 'TBA'}${currentClass.end_time ? ' - ' + currentClass.end_time : ''})`;
             document.getElementById('banner-class-room').innerText = currentClass.room || 'Room TBA';
             document.getElementById('banner-class-prof').innerText = currentClass.instructor || currentTeacherName;
-            document.getElementById('link-excel-grades').href = `teacher_grades.php?class_id=${currentClass.id}`;
+            document.getElementById('link-excel-grades').href = `/teacher/grades.php?class_id=${encodeURIComponent(currentClass.id)}`;
 
             // Generate Session Code Format: NPC-[CODE]-[YYYY-MM-DD]
             const dateStr = new Date().toISOString().slice(0, 10);
@@ -696,7 +749,9 @@ $csrf_token = getCsrfToken();
             // Fetch enrolled students in section via server API (privacy-scoped fields)
             try {
                 const res = await fetch('/api/faculty.php?action=get_section_students&section=' + encodeURIComponent(currentClass.section || 'AIS 2A'), {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
                 const data = await res.json();
                 enrolledStudents = data.success ? (data.students || []) : [];
@@ -728,7 +783,11 @@ $csrf_token = getCsrfToken();
             try {
                 const res = await fetch('/api/faculty.php?action=start_session', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': csrfToken },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-Token': csrfToken
+                    },
                     body: JSON.stringify({
                         class_id: currentClass.id,
                         present_mins: pMins,
@@ -905,8 +964,15 @@ $csrf_token = getCsrfToken();
             try {
                 await fetch('/api/faculty.php?action=end_session', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': csrfToken },
-                    body: JSON.stringify({ session_code: currentSessionCode, csrf_token: csrfToken })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({
+                        session_code: currentSessionCode,
+                        csrf_token: csrfToken
+                    })
                 });
             } catch (err) {
                 console.error('Failed to close session on server:', err);
@@ -923,11 +989,11 @@ $csrf_token = getCsrfToken();
 
         async function endAttendanceSession() {
             if (!await npcConfirm({
-                title: 'End Attendance Session',
-                message: 'End this live attendance session?\n\nConfirming will also mark all remaining unmarked students as ABSENT.\nCancel to keep the session open.',
-                type: 'warning',
-                confirmText: 'End & Mark Absents'
-            })) return;
+                    title: 'End Attendance Session',
+                    message: 'End this live attendance session?\n\nConfirming will also mark all remaining unmarked students as ABSENT.\nCancel to keep the session open.',
+                    type: 'warning',
+                    confirmText: 'End & Mark Absents'
+                })) return;
             clearInterval(timerInterval);
             clearInterval(pollingInterval);
             isSessionActive = false;
@@ -938,12 +1004,20 @@ $csrf_token = getCsrfToken();
             try {
                 const finRes = await fetch('/api/faculty.php?action=finalize_session_absents', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
-                    body: JSON.stringify({ session_code: currentSessionCode, csrf_token: csrfToken })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({
+                        session_code: currentSessionCode,
+                        csrf_token: csrfToken
+                    })
                 });
                 const finData = await finRes.json();
                 if (finData.success && finData.absent_count > 0) absMsg = ` ${finData.absent_count} auto-marked absent.`;
-            } catch (e) { console.warn('finalize failed:', e); }
+            } catch (e) {
+                console.warn('finalize failed:', e);
+            }
 
             // Mark session as inactive in Supabase (server-side)
             await endSessionOnServer();
@@ -955,7 +1029,10 @@ $csrf_token = getCsrfToken();
 
         /* Export this session's attendance as CSV */
         function exportSessionCsv() {
-            if (!currentSessionCode) { showToast('No active session to export.', 'error'); return; }
+            if (!currentSessionCode) {
+                showToast('No active session to export.', 'error');
+                return;
+            }
             window.location.href = '/api/faculty.php?action=export_attendance_csv&session_code=' + encodeURIComponent(currentSessionCode);
         }
 
@@ -966,7 +1043,9 @@ $csrf_token = getCsrfToken();
 
             try {
                 const res = await fetch('/api/faculty.php?action=get_live_roster&session_code=' + encodeURIComponent(currentSessionCode), {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
                 const data = await res.json();
                 attendanceLogs = data.success ? (data.records || []) : [];
@@ -1001,8 +1080,8 @@ $csrf_token = getCsrfToken();
             }
 
             tbody.innerHTML = enrolledStudents.map(s => {
-                const log = attendanceLogs.find(l => 
-                    (l.student_number && s.student_number && l.student_number === s.student_number) || 
+                const log = attendanceLogs.find(l =>
+                    (l.student_number && s.student_number && l.student_number === s.student_number) ||
                     (l.student_name && s.full_name && l.student_name.toLowerCase() === s.full_name.toLowerCase())
                 );
 
@@ -1011,8 +1090,12 @@ $csrf_token = getCsrfToken();
                 let currentStatus = 'absent';
 
                 if (log) {
-                    timeDisplay = new Date(log.check_in_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    
+                    timeDisplay = new Date(log.check_in_at).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+
                     // Live Presence Indicator & Disconnect badge
                     if (log.is_online) {
                         timeDisplay += ' <span class="inline-flex items-center gap-1 font-bold text-status-success ml-1 text-[11px]"><span class="w-1.5 h-1.5 rounded-full bg-status-success animate-ping"></span> Online</span>';
@@ -1066,7 +1149,7 @@ $csrf_token = getCsrfToken();
         // Manual Override of a Student's Attendance Status with Reason Logging
         async function toggleStudentAttendance(studentNum, studentNameEnc, newStatus) {
             const studentName = decodeURIComponent(studentNameEnc);
-            
+
             const reason = prompt(`Enter reason for marking ${studentName} as ${newStatus.toUpperCase()}:`, 'Verified in classroom');
             if (reason === null || !reason.trim()) return;
 
@@ -1075,7 +1158,10 @@ $csrf_token = getCsrfToken();
             try {
                 const res = await fetch('/api/faculty.php?action=correct_attendance', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    },
                     body: JSON.stringify({
                         record_id: existing ? existing.id : '',
                         student_number: studentNum,
@@ -1102,15 +1188,19 @@ $csrf_token = getCsrfToken();
         // Mark All Enrolled Students Present (server-side bulk override)
         async function markAllPresent() {
             if (!await npcConfirm({
-                title: 'Mark All Present',
-                message: 'Mark all enrolled students present for this session?',
-                type: 'info',
-                confirmText: 'Mark All Present'
-            })) return;
+                    title: 'Mark All Present',
+                    message: 'Mark all enrolled students present for this session?',
+                    type: 'info',
+                    confirmText: 'Mark All Present'
+                })) return;
             try {
                 const res = await fetch('/api/faculty.php?action=mark_all_present', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': csrfToken },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-Token': csrfToken
+                    },
                     body: JSON.stringify({
                         class_id: currentClass.id,
                         session_code: currentSessionCode,
@@ -1145,7 +1235,11 @@ $csrf_token = getCsrfToken();
         function listenToRealtimeScans() {
             supabaseClient
                 .channel('teacher-live-attendance')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'attendance_records' }, payload => {
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'attendance_records'
+                }, payload => {
                     if (isSessionActive) {
                         rotateQRToken(false);
                     }
@@ -1195,8 +1289,8 @@ $csrf_token = getCsrfToken();
                     list.innerHTML = '<p class="p-6 text-center text-sm text-on-surface-variant">No excuse letters submitted to you yet.</p>';
                     return;
                 }
-                const pill = st => st === 'Approved' ? 'bg-emerald-100 text-emerald-800'
-                    : (st === 'Rejected' ? 'bg-red-100 text-error' : 'bg-amber-100 text-amber-800');
+                const pill = st => st === 'Approved' ? 'bg-emerald-100 text-emerald-800' :
+                    (st === 'Rejected' ? 'bg-red-100 text-error' : 'bg-amber-100 text-amber-800');
                 list.innerHTML = data.excuses.map(x => {
                     const pending = x.status === 'Pending';
                     return `
@@ -1228,8 +1322,16 @@ $csrf_token = getCsrfToken();
             try {
                 const res = await fetch('/api/faculty.php?action=review_excuse', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
-                    body: JSON.stringify({ id, decision, remarks, csrf_token: csrfToken })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({
+                        id,
+                        decision,
+                        remarks,
+                        csrf_token: csrfToken
+                    })
                 });
                 const data = await res.json();
                 showToast(data.message || (data.success ? 'Updated.' : 'Failed.'), data.success ? 'success' : 'error');
@@ -1243,8 +1345,15 @@ $csrf_token = getCsrfToken();
         }
 
         function escHtml(t) {
-            return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            } [c]));
         }
-   </script>
+    </script>
 </body>
+
 </html>

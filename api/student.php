@@ -724,7 +724,7 @@ if ($method === 'POST' && $action === 'request_grade_clarification') {
         'title' => "Grade Clarification Request — $subjectCode",
         'message' => "$currentUserName ($currentStudentNumber) is asking for clarification on their $subjectCode grade: " . mb_substr($message, 0, 150),
         'type' => 'academic',
-        'link_url' => 'teacher_grades.php'
+        'link_url' => '/teacher/grades.php'
     ]]);
 
     logSecurityEvent("GRADE_CLARIFICATION: $currentStudentNumber for $subjectCode -> $facultyEmail", $currentUserEmail, 'Low');

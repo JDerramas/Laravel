@@ -302,6 +302,60 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
         </div>
     </div>
 
+    <!-- ─── MODAL 2B: Edit Assignment / Course Task ─── -->
+    <div id="modal-edit-assignment" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in" role="dialog" aria-modal="true">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 max-w-md w-full shadow-2xl relative">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-outline-variant/60">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[18px]">edit_note</span>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-primary">Edit Course Assignment</h3>
+                        <p class="text-[11px] text-on-surface-variant font-mono">Course: <span id="edit-asg-course" class="font-bold text-primary"></span></p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeEditAsgModal()" class="p-1 rounded-lg hover:bg-surface-container text-on-surface-variant cursor-pointer">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
+
+            <form id="edit-asg-form" class="space-y-4" onsubmit="handleAssignmentUpdate(event)">
+                <input type="hidden" id="edit-asg-id">
+
+                <div>
+                    <label class="block text-xs font-semibold text-primary mb-1">Assignment Title <span class="text-error">*</span></label>
+                    <input type="text" id="edit-asg-title" class="w-full px-3 py-2 text-xs rounded-xl border border-outline-variant bg-surface text-on-surface focus:ring-2 focus:ring-primary focus:outline-none" required>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-primary mb-1">Instructions & Guidelines</label>
+                    <textarea id="edit-asg-instructions" rows="3" class="w-full px-3 py-2 text-xs rounded-xl border border-outline-variant bg-surface text-on-surface focus:ring-2 focus:ring-primary focus:outline-none" placeholder="Requirements, rubrics, and submission instructions..."></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-primary mb-1">Total Points</label>
+                        <input type="number" id="edit-asg-points" class="w-full px-3 py-2 text-xs rounded-xl border border-outline-variant bg-surface text-on-surface font-mono" value="100" min="10" max="200">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-primary mb-1">Deadline Date</label>
+                        <input type="date" id="edit-asg-due" class="w-full px-3 py-2 text-xs rounded-xl border border-outline-variant bg-surface text-on-surface font-mono" required>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-outline-variant/60 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeEditAsgModal()" class="px-4 py-2 rounded-xl border border-outline-variant text-on-surface hover:bg-surface-container text-xs font-semibold cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" id="edit-asg-submit-btn" class="px-5 py-2 rounded-xl bg-primary text-on-primary hover:opacity-90 text-xs font-bold transition-all shadow-sm cursor-pointer inline-flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px]">save</span> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ─── MODAL 3: Grade Student Submission ─── -->
     <div id="grade-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in" role="dialog" aria-modal="true">
         <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 max-w-md w-full shadow-2xl relative">
@@ -739,11 +793,14 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
             if (asgSel) asgSel.innerHTML = opts;
         }
 
+        var ALL_ASSIGNMENTS_BY_ID = {};
+
         function renderFacultyCourses(courses) {
             var container = document.getElementById('faculty-courses-grid');
             var totalModules = 0;
             var totalAsgs = 0;
             var html = '';
+            ALL_ASSIGNMENTS_BY_ID = {};
 
             courses.forEach(function (c) {
                 totalModules += (c.modules || []).length;
@@ -753,17 +810,14 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                 (c.modules || []).forEach(function (m) {
                     var icon = m.type === 'slides' ? 'slideshow' : (m.type === 'image' ? 'image' : 'description');
                     modulesList += '<div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/40 flex items-center justify-between gap-2 text-xs hover:bg-surface-container transition-colors">' +
-                                  '<div class="flex items-center gap-2 min-w-0">' +
-                                  '<span class="material-symbols-outlined text-[17px] text-primary shrink-0">' + icon + '</span>' +
+                                  '<div onclick="openFilePreviewModal(\'/api/elms.php?action=view_material&id=' + m.id + '&inline=1\', \'' + (m.file_name || m.title || '').replace(/'/g, "\\'") + '\', \'' + m.type + '\', \'' + m.size + '\')" class="flex items-center gap-2 min-w-0 flex-1 cursor-pointer group" title="Click to open file in browser">' +
+                                  '<span class="material-symbols-outlined text-[17px] text-primary shrink-0 group-hover:scale-110 transition-transform">' + icon + '</span>' +
                                   '<div class="min-w-0">' +
-                                  '<p class="font-medium text-primary truncate">' + m.title + '</p>' +
+                                  '<p class="font-medium text-primary group-hover:underline truncate">' + m.title + '</p>' +
                                   '<p class="text-[10px] font-mono text-on-surface-variant">' + (m.file_name || 'handout') + ' · ' + m.size + '</p>' +
                                   '</div>' +
                                   '</div>' +
                                   '<div class="flex items-center gap-1 shrink-0">' +
-                                  '<button type="button" onclick="openFilePreviewModal(\'/api/elms.php?action=view_material&id=' + m.id + '&inline=1\', \'' + (m.file_name || m.title || '').replace(/'/g, "\\'") + '\', \'' + m.type + '\', \'' + m.size + '\')" class="p-1.5 rounded-lg border border-primary/30 bg-primary/10 hover:bg-primary hover:text-white text-primary transition-colors inline-flex items-center cursor-pointer" title="View Handout in Browser">' +
-                                  '<span class="material-symbols-outlined text-[15px]">visibility</span>' +
-                                  '</button>' +
                                   '<a href="/api/elms.php?action=download_material&id=' + m.id + '" target="_blank" class="p-1.5 rounded-lg border border-outline-variant bg-surface hover:bg-primary hover:text-white text-primary transition-colors inline-flex items-center" title="Download Handout">' +
                                   '<span class="material-symbols-outlined text-[15px]">download</span>' +
                                   '</a>' +
@@ -776,10 +830,20 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
 
                 var asgList = '';
                 (c.assignments || []).forEach(function (a) {
-                    asgList += '<div class="p-2 rounded-xl bg-surface-container-low border border-outline-variant/40 flex items-center justify-between gap-2 text-xs">' +
-                               '<div class="min-w-0">' +
-                               '<p class="font-bold text-on-surface truncate">' + a.title + '</p>' +
+                    a.course_code = c.code;
+                    ALL_ASSIGNMENTS_BY_ID[a.id] = a;
+                    asgList += '<div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/40 flex items-center justify-between gap-2 text-xs hover:bg-surface-container transition-colors">' +
+                               '<div onclick="openEditAsgModal(\'' + a.id + '\')" class="min-w-0 flex-1 cursor-pointer group" title="Click to edit task / gagawin">' +
+                               '<p class="font-bold text-on-surface group-hover:text-primary group-hover:underline truncate">' + a.title + '</p>' +
                                '<p class="text-[10px] font-mono text-on-surface-variant">Due: ' + a.due_date + ' · ' + a.points + ' pts</p>' +
+                               '</div>' +
+                               '<div class="flex items-center gap-1 shrink-0">' +
+                               '<button type="button" onclick="openEditAsgModal(\'' + a.id + '\')" class="p-1.5 rounded-lg border border-outline-variant bg-surface hover:bg-primary hover:text-white text-primary transition-colors inline-flex items-center cursor-pointer" title="Edit Task">' +
+                               '<span class="material-symbols-outlined text-[15px]">edit</span>' +
+                               '</button>' +
+                               '<button type="button" onclick="deleteAssignment(\'' + a.id + '\', \'' + (a.title || '').replace(/'/g, "\\'") + '\')" class="p-1.5 rounded-lg border border-red-500/20 bg-surface hover:bg-red-500 hover:text-white text-red-500 transition-colors inline-flex items-center cursor-pointer" title="Delete Task">' +
+                               '<span class="material-symbols-outlined text-[15px]">delete</span>' +
+                               '</button>' +
                                '</div>' +
                                '</div>';
                 });
@@ -908,16 +972,13 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                 if (filesList.length > 0) {
                     fileOrLinkHtml += '<div class="space-y-1.5 max-w-[280px]">';
                     filesList.forEach(function (f, idx) {
-                        fileOrLinkHtml += '<div class="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-surface border border-outline-variant/60 text-xs shadow-2xs">' +
-                                          '<div class="flex items-center gap-1.5 min-w-0">' +
-                                          '<span class="material-symbols-outlined text-[16px] text-primary shrink-0">description</span>' +
-                                          '<span class="truncate font-semibold text-primary text-[11px]" title="' + f.file_name + '">' + f.file_name + '</span>' +
+                        fileOrLinkHtml += '<div class="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-surface border border-outline-variant/60 text-xs shadow-2xs hover:bg-surface-container transition-colors">' +
+                                          '<div onclick="openFilePreviewModal(\'/api/elms.php?action=view_submission&id=' + s.id + '&file_idx=' + idx + '&inline=1\', \'' + (f.file_name || 'Proof').replace(/'/g, "\\'") + '\', \'' + (f.file_type || '') + '\', \'' + (f.file_size || '') + '\')" class="flex items-center gap-1.5 min-w-0 flex-1 cursor-pointer group" title="Click to view file">' +
+                                          '<span class="material-symbols-outlined text-[16px] text-primary shrink-0 group-hover:scale-110 transition-transform">description</span>' +
+                                          '<span class="truncate font-semibold text-primary group-hover:underline text-[11px]" title="' + f.file_name + '">' + f.file_name + '</span>' +
                                           '<span class="text-[9px] font-mono text-on-surface-variant shrink-0">(' + (f.file_size || 'file') + ')</span>' +
                                           '</div>' +
                                           '<div class="flex items-center gap-1 shrink-0">' +
-                                          '<button type="button" onclick="openFilePreviewModal(\'/api/elms.php?action=view_submission&id=' + s.id + '&file_idx=' + idx + '&inline=1\', \'' + (f.file_name || 'Proof').replace(/'/g, "\\'") + '\', \'' + (f.file_type || '') + '\', \'' + (f.file_size || '') + '\')" class="px-2 py-0.5 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold text-[10px] transition-colors inline-flex items-center gap-0.5 cursor-pointer" title="View inside Browser">' +
-                                          '<span class="material-symbols-outlined text-[13px]">visibility</span> View' +
-                                          '</button>' +
                                           '<a href="/api/elms.php?action=download_submission&id=' + s.id + '&file_idx=' + idx + '" target="_blank" class="p-1 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors inline-flex items-center" title="Download">' +
                                           '<span class="material-symbols-outlined text-[13px]">download</span>' +
                                           '</a>' +
@@ -984,6 +1045,32 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
             document.getElementById('create-asg-modal').classList.remove('flex');
         }
 
+        function openEditAsgModal(asgId) {
+            var a = ALL_ASSIGNMENTS_BY_ID[asgId];
+            if (!a) return;
+            document.getElementById('edit-asg-id').value = a.id;
+            document.getElementById('edit-asg-course').textContent = a.course_code || '';
+            document.getElementById('edit-asg-title').value = a.title || '';
+            document.getElementById('edit-asg-instructions').value = a.instructions || '';
+            document.getElementById('edit-asg-points').value = a.points || 100;
+            var dueDateOnly = (a.due_date || '').split(' ')[0] || '';
+            document.getElementById('edit-asg-due').value = dueDateOnly;
+
+            var modal = document.getElementById('modal-edit-assignment');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeEditAsgModal() {
+            var modal = document.getElementById('modal-edit-assignment');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
         function openGradeModalById(subId) {
             var s = ALL_SUBMISSIONS_BY_ID[subId];
             if (!s) return;
@@ -1015,16 +1102,13 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                 fileContainer.classList.remove('hidden');
                 var fHtml = '';
                 filesToRender.forEach(function(f, idx) {
-                    fHtml += '<div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-surface border border-outline-variant/60">' +
-                             '<div class="flex items-center gap-2 min-w-0">' +
-                             '<span class="material-symbols-outlined text-[17px] text-primary shrink-0">description</span>' +
-                             '<span class="truncate font-semibold text-primary text-xs">' + f.file_name + '</span>' +
+                    fHtml += '<div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-surface border border-outline-variant/60 hover:bg-surface-container transition-colors">' +
+                             '<div onclick="openFilePreviewModal(\'/api/elms.php?action=view_submission&id=' + subId + '&file_idx=' + idx + '&inline=1\', \'' + (f.file_name || 'Proof').replace(/'/g, "\\'") + '\', \'' + (f.file_type || '') + '\', \'' + (f.file_size || '') + '\')" class="flex items-center gap-2 min-w-0 flex-1 cursor-pointer group" title="Click to view work">' +
+                             '<span class="material-symbols-outlined text-[17px] text-primary shrink-0 group-hover:scale-110 transition-transform">description</span>' +
+                             '<span class="truncate font-semibold text-primary group-hover:underline text-xs">' + f.file_name + '</span>' +
                              '<span class="text-[10px] font-mono text-on-surface-variant shrink-0">(' + (f.file_size || '') + ')</span>' +
                              '</div>' +
                              '<div class="flex items-center gap-1.5 shrink-0">' +
-                             '<button type="button" onclick="openFilePreviewModal(\'/api/elms.php?action=view_submission&id=' + subId + '&file_idx=' + idx + '&inline=1\', \'' + (f.file_name || 'Proof').replace(/'/g, "\\'") + '\', \'' + (f.file_type || '') + '\', \'' + (f.file_size || '') + '\')" class="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold text-xs transition-colors inline-flex items-center gap-1 cursor-pointer">' +
-                             '<span class="material-symbols-outlined text-[14px]">visibility</span> View Work' +
-                             '</button>' +
                              '<a href="/api/elms.php?action=download_submission&id=' + subId + '&file_idx=' + idx + '" target="_blank" class="p-1 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors inline-flex items-center" title="Download">' +
                              '<span class="material-symbols-outlined text-[14px]">download</span>' +
                              '</a>' +
@@ -1173,6 +1257,71 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">save</span> Publish Assignment';
+            }
+        }
+
+        async function handleAssignmentUpdate(e) {
+            e.preventDefault();
+            var asgId = document.getElementById('edit-asg-id').value;
+            var title = document.getElementById('edit-asg-title').value.trim();
+            var instructions = document.getElementById('edit-asg-instructions').value.trim();
+            var points = parseInt(document.getElementById('edit-asg-points').value) || 100;
+            var dueDate = document.getElementById('edit-asg-due').value + ' 23:59';
+            var btn = document.getElementById('edit-asg-submit-btn');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span> Saving...';
+
+            try {
+                var res = await fetch('/api/elms.php?action=update_assignment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: asgId,
+                        assignment_id: asgId,
+                        title: title,
+                        instructions: instructions,
+                        points: points,
+                        due_date: dueDate
+                    })
+                });
+                var data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Failed to update assignment');
+
+                closeEditAsgModal();
+                if (window.notify) {
+                    window.notify('Assignment updated successfully!', 'success');
+                } else {
+                    alert('Assignment updated successfully!');
+                }
+                loadFacultyElms();
+            } catch (err) {
+                alert('Error updating assignment: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">save</span> Save Changes';
+            }
+        }
+
+        async function deleteAssignment(asgId, asgTitle) {
+            if (!confirm('Are you sure you want to delete the task "' + asgTitle + '"?\nNote: Any associated student submissions will also be deleted.')) return;
+            try {
+                var formData = new FormData();
+                formData.append('id', asgId);
+                var res = await fetch('/api/elms.php?action=delete_assignment', {
+                    method: 'POST',
+                    body: formData
+                });
+                var data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Failed to delete assignment');
+                if (window.notify) {
+                    window.notify('Assignment removed successfully.', 'info');
+                } else {
+                    alert('Assignment removed successfully.');
+                }
+                loadFacultyElms();
+            } catch (err) {
+                alert('Error deleting assignment: ' + err.message);
             }
         }
 
@@ -1876,7 +2025,7 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
             });
             if (FACULTY_REALTIME_SYNC_INTERVAL) clearInterval(FACULTY_REALTIME_SYNC_INTERVAL);
             FACULTY_REALTIME_SYNC_INTERVAL = setInterval(function() {
-                var anyModalOpen = document.querySelector('#modal-add-module:not(.hidden), #modal-create-assignment:not(.hidden), #modal-grade-submission:not(.hidden), #modal-start-live:not(.hidden)');
+                var anyModalOpen = document.querySelector('#upload-modal:not(.hidden), #create-asg-modal:not(.hidden), #modal-edit-assignment:not(.hidden), #grade-modal:not(.hidden), #start-live-modal:not(.hidden), #file-preview-modal:not(.hidden), #classroom-modal:not(.hidden)');
                 if (!anyModalOpen) {
                     loadFacultyElms(false);
                 }

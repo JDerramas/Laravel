@@ -744,7 +744,7 @@ if ($method === 'POST' && $action === 'review_grade_change') {
         'title' => "Grade Change Request $decision",
         'message' => "Your grade change request for {$req['student_name']} in {$req['class_code']} was $decision by the Registrar." . (!empty($adminRemarks) ? " Remarks: $adminRemarks" : ''),
         'type' => 'grade',
-        'link_url' => "teacher_grades.php?class_id={$req['class_id']}"
+        'link_url' => "/teacher/grades.php?class_id={$req['class_id']}"
     ]]);
 
     logSecurityEvent("GRADE_CHANGE_REVIEWED: Request $requestId $decision by $currentUserEmail", $currentUserEmail, 'High');

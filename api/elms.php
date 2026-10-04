@@ -755,6 +755,37 @@ if ($action === 'delete_assignment') {
     exit;
 }
 
+// ─── POST: Update / Edit Assignment (Faculty / Admin -> MySQL) ────────────────
+if ($action === 'update_assignment' || $action === 'edit_assignment') {
+    if (!in_array($userRole, ['teacher', 'faculty', 'admin', 'registrar'])) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+        exit;
+    }
+
+    $id = trim($_POST['id'] ?? $input['id'] ?? $_POST['assignment_id'] ?? $input['assignment_id'] ?? '');
+    $title = trim($_POST['title'] ?? $input['title'] ?? '');
+    $instructions = trim($_POST['instructions'] ?? $input['instructions'] ?? '');
+    $dueDate = trim($_POST['due_date'] ?? $input['due_date'] ?? '');
+    $points = intval($_POST['points'] ?? $input['points'] ?? 100);
+
+    if (empty($id) || empty($title)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Assignment ID and title are required.']);
+        exit;
+    }
+
+    $db = getDB();
+    $stmt = $db->prepare("UPDATE lms_assignments SET title = ?, instructions = ?, due_date = ?, points = ? WHERE id = ?");
+    $stmt->execute([$title, $instructions, $dueDate, $points > 0 ? $points : 100, $id]);
+
+    echo json_encode([
+        'success' => true,
+        'message' => "Assignment '{$title}' updated successfully."
+    ]);
+    exit;
+}
+
 // ─── 4. POST: Submit Assignment (Student -> MySQL File Upload & Links) ─────────
 if ($action === 'submit_assignment') {
     $asgId = trim($_POST['assignment_id'] ?? $input['assignment_id'] ?? '');
@@ -894,6 +925,98 @@ if ($action === 'submit_assignment') {
             'status'         => 'Submitted'
         ]
     ]);
+    exit;
+}
+
+// ─── POST: Delete Submission / Proof (Student or Faculty/Admin) ───────────────
+if ($action === 'delete_submission' || $action === 'delete_proof') {
+    $subId = trim($_POST['id'] ?? $input['id'] ?? $_POST['submission_id'] ?? $input['submission_id'] ?? '');
+    $asgId = trim($_POST['assignment_id'] ?? $input['assignment_id'] ?? '');
+
+    $db = getDB();
+    $sub = null;
+    if (!empty($subId)) {
+        $stmt = $db->prepare("SELECT * FROM lms_submissions WHERE id = ? LIMIT 1");
+        $stmt->execute([$subId]);
+        $sub = $stmt->fetch(PDO::FETCH_ASSOC);
+    } elseif (!empty($asgId)) {
+        if ($userRole === 'student') {
+            $stmt = $db->prepare("SELECT * FROM lms_submissions WHERE assignment_id = ? AND (student_number = ? OR LOWER(student_email) = ?) LIMIT 1");
+            $stmt->execute([$asgId, $studentNumber, strtolower($userEmail)]);
+            $sub = $stmt->fetch(PDO::FETCH_ASSOC);
+        } else {
+            $stmt = $db->prepare("SELECT * FROM lms_submissions WHERE assignment_id = ? LIMIT 1");
+            $stmt->execute([$asgId]);
+            $sub = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+    }
+
+    if (!$sub) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'Submission not found.']);
+        exit;
+    }
+
+    $subId = $sub['id'];
+
+    if ($userRole === 'student') {
+        if ($sub['student_number'] !== $studentNumber && strtolower($sub['student_email']) !== strtolower($userEmail)) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Unauthorized to delete this submission.']);
+            exit;
+        }
+    }
+
+    $fileIdx = isset($_POST['file_idx']) ? intval($_POST['file_idx']) : (isset($input['file_idx']) ? intval($input['file_idx']) : null);
+    if ($fileIdx !== null && !empty($sub['attachments_json'])) {
+        $attachments = json_decode($sub['attachments_json'], true);
+        if (is_array($attachments) && isset($attachments[$fileIdx])) {
+            $delTarget = $attachments[$fileIdx]['file_path'] ?? '';
+            if ($delTarget) {
+                $f = dirname(__DIR__) . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $delTarget);
+                if (file_exists($f)) @unlink($f);
+            }
+            array_splice($attachments, $fileIdx, 1);
+            if (empty($attachments)) {
+                if (empty($sub['submitted_link'])) {
+                    $db->prepare("DELETE FROM lms_submissions WHERE id = ?")->execute([$subId]);
+                    echo json_encode(['success' => true, 'message' => 'Proof file deleted. Submission cleared.']);
+                    exit;
+                } else {
+                    $db->prepare("UPDATE lms_submissions SET file_path = '', file_name = '', file_type = '', file_size = '', attachments_json = '[]' WHERE id = ?")->execute([$subId]);
+                    echo json_encode(['success' => true, 'message' => 'Proof file removed.']);
+                    exit;
+                }
+            } else {
+                $newAttJson = json_encode($attachments);
+                $first = $attachments[0];
+                $db->prepare("UPDATE lms_submissions SET file_path = ?, file_name = ?, file_type = ?, file_size = ?, attachments_json = ? WHERE id = ?")
+                   ->execute([$first['file_path'] ?? '', $first['file_name'] ?? '', $first['file_type'] ?? '', $first['file_size'] ?? '', $newAttJson, $subId]);
+                echo json_encode(['success' => true, 'message' => 'Proof file removed.']);
+                exit;
+            }
+        }
+    }
+
+    // Delete all attached files on disk
+    if (!empty($sub['attachments_json'])) {
+        $attachments = json_decode($sub['attachments_json'], true);
+        if (is_array($attachments)) {
+            foreach ($attachments as $att) {
+                if (!empty($att['file_path'])) {
+                    $f = dirname(__DIR__) . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $att['file_path']);
+                    if (file_exists($f)) @unlink($f);
+                }
+            }
+        }
+    }
+    if (!empty($sub['file_path'])) {
+        $f = dirname(__DIR__) . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $sub['file_path']);
+        if (file_exists($f)) @unlink($f);
+    }
+
+    $db->prepare("DELETE FROM lms_submissions WHERE id = ?")->execute([$subId]);
+    echo json_encode(['success' => true, 'message' => 'Proof of submission deleted successfully.']);
     exit;
 }
 

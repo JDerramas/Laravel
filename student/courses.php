@@ -748,17 +748,14 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
                     var viewUrl = '/api/elms.php?action=view_material&id=' + encodeURIComponent(m.id) + '&inline=1';
                     var dlUrl = '/api/elms.php?action=download_material&id=' + encodeURIComponent(m.id);
                     modulesHtml += '<div class="p-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container border border-outline-variant/40 flex items-center justify-between gap-3 transition-colors">' +
-                                   '<div class="flex items-center gap-2 min-w-0">' +
-                                   '<span class="material-symbols-outlined text-[18px] text-primary shrink-0">' + icon + '</span>' +
+                                   '<div onclick="openFilePreviewModal(\'' + viewUrl + '\', \'' + (m.file_name || m.title).replace(/'/g, "\\'") + '\', \'' + (m.type || '') + '\', \'' + (m.size || '') + '\')" class="flex items-center gap-2 min-w-0 flex-1 cursor-pointer group" title="Click to open file in browser">' +
+                                   '<span class="material-symbols-outlined text-[18px] text-primary shrink-0 group-hover:scale-110 transition-transform">' + icon + '</span>' +
                                    '<div class="min-w-0">' +
-                                   '<p class="text-xs font-semibold text-primary truncate">' + m.title + '</p>' +
+                                   '<p class="text-xs font-semibold text-primary group-hover:underline truncate">' + m.title + '</p>' +
                                    '<p class="text-[10px] font-mono text-on-surface-variant">' + (m.file_name || 'handout') + ' · ' + m.size + '</p>' +
                                    '</div>' +
                                    '</div>' +
                                    '<div class="flex items-center gap-1 shrink-0">' +
-                                   '<button type="button" onclick="openFilePreviewModal(\'' + viewUrl + '\', \'' + (m.file_name || m.title).replace(/'/g, "\\'") + '\', \'' + (m.type || '') + '\', \'' + (m.size || '') + '\')" class="p-1.5 rounded-lg border border-outline-variant bg-surface hover:bg-primary hover:text-white text-primary transition-colors cursor-pointer" title="View ' + m.title.replace(/'/g, "\\'") + ' without downloading">' +
-                                   '<span class="material-symbols-outlined text-[16px]">visibility</span>' +
-                                   '</button>' +
                                    '<a href="' + dlUrl + '" download target="_blank" class="p-1.5 rounded-lg border border-outline-variant bg-surface hover:bg-primary hover:text-white text-primary transition-colors" title="Download ' + m.title.replace(/'/g, "\\'") + '">' +
                                    '<span class="material-symbols-outlined text-[16px]">download</span>' +
                                    '</a>' +
@@ -847,16 +844,20 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
                         files.forEach(function(f, fIdx) {
                             var viewUrl = '/api/elms.php?action=view_submission&id=' + encodeURIComponent(asg.submission_id) + '&file_idx=' + fIdx + '&inline=1';
                             var dlUrl = '/api/elms.php?action=download_submission&id=' + encodeURIComponent(asg.submission_id) + '&file_idx=' + fIdx;
-                            attachedFilesHtml += '<div class="px-2.5 py-1.5 rounded-xl bg-primary/10 border border-primary/25 flex items-center gap-2 text-xs">' +
-                                                '<span class="material-symbols-outlined text-[15px] text-primary">description</span>' +
-                                                '<span class="font-bold text-primary truncate max-w-[150px]" title="' + f.name.replace(/"/g, '&quot;') + '">' + f.name + '</span>' +
+                            attachedFilesHtml += '<div class="px-2.5 py-1.5 rounded-xl bg-primary/10 border border-primary/25 flex items-center gap-2 text-xs hover:bg-primary/15 transition-colors">' +
+                                                '<div onclick="openFilePreviewModal(\'' + viewUrl + '\', \'' + f.name.replace(/'/g, "\\'") + '\', \'' + (f.type || '') + '\', \'' + (f.size || '') + '\')" class="flex items-center gap-2 min-w-0 flex-1 cursor-pointer group" title="Click to view file">' +
+                                                '<span class="material-symbols-outlined text-[15px] text-primary group-hover:scale-110 transition-transform">description</span>' +
+                                                '<span class="font-bold text-primary group-hover:underline truncate max-w-[150px]" title="' + f.name.replace(/"/g, '&quot;') + '">' + f.name + '</span>' +
                                                 (f.size ? '<span class="text-[10px] font-mono text-on-surface-variant">(' + f.size + ')</span>' : '') +
-                                                '<button type="button" onclick="openFilePreviewModal(\'' + viewUrl + '\', \'' + f.name.replace(/'/g, "\\'") + '\', \'' + (f.type || '') + '\', \'' + (f.size || '') + '\')" class="px-2 py-0.5 rounded-lg bg-surface hover:bg-primary hover:text-white text-primary text-[11px] font-bold border border-outline-variant flex items-center gap-0.5 cursor-pointer shadow-2xs" title="View inside browser (no download needed)">' +
-                                                '<span class="material-symbols-outlined text-[13px]">visibility</span> View' +
-                                                '</button>' +
+                                                '</div>' +
+                                                '<div class="flex items-center gap-1 shrink-0">' +
                                                 '<a href="' + dlUrl + '" download target="_blank" class="p-1 rounded-lg bg-surface hover:bg-surface-container text-on-surface text-[11px] border border-outline-variant flex items-center gap-0.5" title="Direct download">' +
                                                 '<span class="material-symbols-outlined text-[13px]">download</span>' +
                                                 '</a>' +
+                                                '<button type="button" onclick="deleteSubmissionFile(\'' + encodeURIComponent(asg.submission_id) + '\', ' + fIdx + ', event)" class="p-1 rounded-lg hover:bg-red-500/20 text-red-500 cursor-pointer" title="Delete this proof file">' +
+                                                '<span class="material-symbols-outlined text-[13px]">delete</span>' +
+                                                '</button>' +
+                                                '</div>' +
                                                 '</div>';
                         });
                         attachedFilesHtml += '</div></div>';
@@ -941,18 +942,15 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
                 else if (['zip', 'rar'].includes(ext)) icon = 'folder_zip';
                 else if (['txt', 'sql', 'json', 'js', 'py'].includes(ext)) icon = 'code';
 
-                html += '<div class="p-2.5 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-between text-xs gap-2">' +
-                        '<div class="flex items-center gap-2 truncate min-w-0">' +
-                        '<span class="material-symbols-outlined text-primary text-[18px] shrink-0">' + icon + '</span>' +
+                html += '<div class="p-2.5 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-between text-xs gap-2 hover:bg-primary/15 transition-colors">' +
+                        '<div onclick="previewStagedFile(' + idx + ')" class="flex items-center gap-2 truncate min-w-0 flex-1 cursor-pointer group" title="Click to preview file">' +
+                        '<span class="material-symbols-outlined text-primary text-[18px] shrink-0 group-hover:scale-110 transition-transform">' + icon + '</span>' +
                         '<div class="truncate">' +
-                        '<p class="font-bold text-primary truncate">' + f.name + '</p>' +
+                        '<p class="font-bold text-primary group-hover:underline truncate">' + f.name + '</p>' +
                         '<p class="text-[10px] font-mono text-on-surface-variant">Proof #' + (idx + 1) + ' · ' + sz + '</p>' +
                         '</div>' +
                         '</div>' +
                         '<div class="flex items-center gap-1.5 shrink-0">' +
-                        '<button type="button" onclick="previewStagedFile(' + idx + ')" class="px-2.5 py-1 rounded-lg border border-primary/30 bg-surface hover:bg-primary hover:text-white text-primary text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer transition-colors shadow-2xs" title="Preview file in browser">' +
-                        '<span class="material-symbols-outlined text-[14px]">visibility</span> View' +
-                        '</button>' +
                         '<button type="button" onclick="removeStagedStudentFile(' + idx + ')" class="p-1 rounded-lg hover:bg-red-500/20 text-red-500 cursor-pointer" title="Remove proof">' +
                         '<span class="material-symbols-outlined text-[16px]">close</span>' +
                         '</button>' +
@@ -1026,21 +1024,21 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
                 prevFiles.forEach(function(f, idx) {
                     var viewUrl = '/api/elms.php?action=view_submission&id=' + encodeURIComponent(subId) + '&file_idx=' + idx + '&inline=1';
                     var dlUrl = '/api/elms.php?action=download_submission&id=' + encodeURIComponent(subId) + '&file_idx=' + idx;
-                    prevHtml += '<div class="p-2.5 rounded-xl bg-surface border border-outline-variant/60 flex items-center justify-between text-xs gap-2">' +
-                                '<div class="flex items-center gap-2 truncate min-w-0">' +
-                                '<span class="material-symbols-outlined text-primary text-[18px] shrink-0">task</span>' +
+                    prevHtml += '<div class="p-2.5 rounded-xl bg-surface border border-outline-variant/60 flex items-center justify-between text-xs gap-2 hover:bg-surface-container transition-colors">' +
+                                '<div onclick="openFilePreviewModal(\'' + viewUrl + '\', \'' + f.name.replace(/'/g, "\\'") + '\', \'' + (f.type || '') + '\', \'' + (f.size || '') + '\')" class="flex items-center gap-2 truncate min-w-0 flex-1 cursor-pointer group" title="Click to view file">' +
+                                '<span class="material-symbols-outlined text-primary text-[18px] shrink-0 group-hover:scale-110 transition-transform">task</span>' +
                                 '<div class="truncate">' +
-                                '<p class="font-bold text-primary truncate">' + f.name + '</p>' +
+                                '<p class="font-bold text-primary group-hover:underline truncate">' + f.name + '</p>' +
                                 '<p class="text-[10px] font-mono text-on-surface-variant">Proof #' + (idx + 1) + (f.size ? ' · ' + f.size : '') + '</p>' +
                                 '</div>' +
                                 '</div>' +
                                 '<div class="flex items-center gap-1.5 shrink-0">' +
-                                '<button type="button" onclick="openFilePreviewModal(\'' + viewUrl + '\', \'' + f.name.replace(/'/g, "\\'") + '\', \'' + (f.type || '') + '\', \'' + (f.size || '') + '\')" class="px-2.5 py-1 rounded-lg border border-primary/30 bg-surface hover:bg-primary hover:text-white text-primary text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs" title="View file in browser (no download needed)">' +
-                                '<span class="material-symbols-outlined text-[14px]">visibility</span> View' +
-                                '</button>' +
                                 '<a href="' + dlUrl + '" download target="_blank" class="p-1 rounded-lg border border-outline-variant bg-surface hover:bg-surface-container text-on-surface text-[11px] flex items-center gap-1" title="Direct download">' +
                                 '<span class="material-symbols-outlined text-[14px]">download</span>' +
                                 '</a>' +
+                                '<button type="button" onclick="deleteSubmissionFile(\'' + encodeURIComponent(subId) + '\', ' + idx + ', event)" class="p-1 rounded-lg border border-red-500/20 bg-surface hover:bg-red-500 hover:text-white text-red-500 transition-colors cursor-pointer" title="Delete this proof file">' +
+                                '<span class="material-symbols-outlined text-[14px]">delete</span>' +
+                                '</button>' +
                                 '</div>' +
                                 '</div>';
                 });
@@ -1061,6 +1059,52 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
             var modal = document.getElementById('submission-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+        }
+
+        async function deleteSubmissionProof(subId, asgTitle, event) {
+            if (event) event.stopPropagation();
+            if (!confirm('Delete ALL proof files for "' + asgTitle + '"? This will clear your entire submission.')) return;
+            try {
+                var res = await fetch('/api/elms.php?action=delete_submission', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: decodeURIComponent(subId) })
+                });
+                var data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Failed to delete submission');
+                if (window.notify) {
+                    window.notify('Proof deleted successfully.', 'info');
+                } else {
+                    alert('Proof deleted successfully.');
+                }
+                closeSubmissionModal();
+                loadElmsData(true);
+            } catch (err) {
+                alert('Error deleting proof: ' + err.message);
+            }
+        }
+
+        async function deleteSubmissionFile(subId, fileIdx, event) {
+            if (event) event.stopPropagation();
+            if (!confirm('Delete this proof file (#' + (fileIdx + 1) + ')? This cannot be undone.')) return;
+            try {
+                var res = await fetch('/api/elms.php?action=delete_proof', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: decodeURIComponent(subId), file_idx: fileIdx })
+                });
+                var data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Failed to delete proof file');
+                if (window.notify) {
+                    window.notify(data.message || 'Proof file removed.', 'info');
+                } else {
+                    alert(data.message || 'Proof file removed.');
+                }
+                closeSubmissionModal();
+                loadElmsData(true);
+            } catch (err) {
+                alert('Error deleting proof file: ' + err.message);
+            }
         }
 
         async function handleAssignmentSubmit(e) {
