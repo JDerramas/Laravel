@@ -1610,6 +1610,11 @@ html:not(.dark) #npc-three-bg-canvas {
    NPC CONNECT — 3D ICON & ELEMENT ANIMATION SUITE
    ============================================================ */
 
+/* 3D Holographic Badge Ring */
+.hologram-glow {
+    box-shadow: 0 0 25px rgba(254, 212, 136, 0.25), inset 0 0 15px rgba(56, 189, 248, 0.15);
+}
+
 /* 1. 3D Perspective Container */
 .npc-3d-wrap {
     perspective: 1000px;
