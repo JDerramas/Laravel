@@ -1,22 +1,27 @@
-# 🏛️ Navotas Polytechnic College — ELMS & Campus CAD Workstation
+# 🏛️️ Navotas Polytechnic College — ELMS & Campus CAD Workstation
 
-Maligayang pagdating sa **NPC ELMS (Electronic Learning Management System)**!
+Welcome to the **NPC ELMS (Electronic Learning Management System)**!
 
-Nilikha ang isang detalyado at komprehensibong paliwanag para sa **LAHAT ng folders at files** ng buong system.
+A detailed and comprehensive breakdown has been created for **ALL folders and files** across the entire system.
 
-👉 **Basahin ang kumpletong paliwanag dito:** [SYSTEM_FILES_EXPLAINED.md](file:///d:/xampp/htdocs/llama-b10483-bin-win-cpu-x64/LocalAI/app/SYSTEM_FILES_EXPLAINED.md)
+👉 **Read the full documentation here:** SYSTEM_FILES_EXPLAINED.md
 
 ---
 
-### 🚀 Mabilisang Pagsisimula (Quick Start)
-1. Siguraduhing tumatakbo ang MySQL sa XAMPP (Port 3306).
-2. Patakbuhin ang `start.bat` o:
-   ```cmd
-   php -S 127.0.0.1:8000
-   ```
-3. Buksan ang browser sa: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+### 🚀 Quick Start
 
-### 🔑 Mahalagang Tampok:
-- **Instant Gmail Auto-Login (Walang Password):** I-type lamang ang iyong `@gmail.com` sa login page para sa instant 1-click access.
-- **DPWH Campus CAD Blueprint & 3D BIM:** Makikita sa `/campus_map.php` na may real-time occupancy at strict single-host room release.
-- **Opisyal na NPC Emerald Green Theme:** Alinsunod sa [navotaspolytechniccollege.edu.ph](https://navotaspolytechniccollege.edu.ph/) gamit ang opisyal na NPC seal.
+1. Ensure MySQL is running in XAMPP (Port 3306).
+2. Run `start.bat` or execute:
+```cmd
+php -S 127.0.0.1:8000
+
+```
+
+
+3. Open your browser and go to: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+### 🔑 Key Features:
+
+* **Instant Gmail Auto-Login (Passwordless):** Simply enter your `@gmail.com` address on the login page for instant 1-click access.
+* **DPWH Campus CAD Blueprint & 3D BIM:** Accessible at `/campus_map.php`, featuring real-time occupancy tracking and strict single-host room release.
+* **Official NPC Emerald Green Theme:** Styled to match [navotaspolytechniccollege.edu.ph](https://navotaspolytechniccollege.edu.ph/) and featuring the official NPC seal.
