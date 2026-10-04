@@ -247,7 +247,8 @@ if (!$isDirectApiCall) {
 }
 
 // ─── 0. GET: Secure File Downloads (Materials & Submissions) ──────────────────
-if ($action === 'download_material') {
+// ─── 0. GET: Secure File Viewing & Downloads (Materials & Submissions) ──────────
+if ($action === 'download_material' || $action === 'view_material') {
     $id = intval($_GET['id'] ?? 0);
     if ($id <= 0) {
         http_response_code(400);
@@ -286,19 +287,24 @@ if ($action === 'download_material') {
         'webp' => 'image/webp',
         'gif'  => 'image/gif',
         'zip'  => 'application/zip',
-        'txt'  => 'text/plain'
+        'txt'  => 'text/plain; charset=utf-8',
+        'sql'  => 'text/plain; charset=utf-8',
+        'json' => 'application/json; charset=utf-8',
+        'csv'  => 'text/csv; charset=utf-8'
     ];
     $contentType = $mimes[$ext] ?? 'application/octet-stream';
+    $isInline = (!empty($_GET['inline']) || !empty($_GET['view']) || $action === 'view_material');
+    $disposition = $isInline ? 'inline' : 'attachment';
 
     header('Content-Type: ' . $contentType);
-    header('Content-Disposition: attachment; filename="' . addslashes($origName) . '"');
+    header('Content-Disposition: ' . $disposition . '; filename="' . addslashes($origName) . '"');
     header('Content-Length: ' . filesize($fullPath));
     header('Cache-Control: private, max-age=0, must-revalidate');
     readfile($fullPath);
     exit;
 }
 
-if ($action === 'download_submission') {
+if ($action === 'download_submission' || $action === 'view_submission') {
     $id = trim($_GET['id'] ?? '');
     if (empty($id)) {
         http_response_code(400);
@@ -308,12 +314,30 @@ if ($action === 'download_submission') {
     $stmt = $db->prepare("SELECT * FROM lms_submissions WHERE id = ? LIMIT 1");
     $stmt->execute([$id]);
     $sub = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$sub || empty($sub['file_path'])) {
+    if (!$sub) {
         http_response_code(404);
         exit('Submission file not found.');
     }
 
-    $relPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $sub['file_path']);
+    $targetPath = $sub['file_path'];
+    $origName = $sub['file_name'];
+
+    // Support specific file index for multi-file submissions (e.g. proof 1 vs proof 2)
+    $fileIdx = isset($_GET['file_idx']) ? intval($_GET['file_idx']) : null;
+    if ($fileIdx !== null && !empty($sub['attachments_json'])) {
+        $attachments = json_decode($sub['attachments_json'], true);
+        if (is_array($attachments) && isset($attachments[$fileIdx])) {
+            $targetPath = $attachments[$fileIdx]['file_path'] ?? $targetPath;
+            $origName = $attachments[$fileIdx]['file_name'] ?? $origName;
+        }
+    }
+
+    if (empty($targetPath)) {
+        http_response_code(404);
+        exit('Submission attachment path is empty.');
+    }
+
+    $relPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $targetPath);
     $fullPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . $relPath;
 
     if (!file_exists($fullPath) || !is_file($fullPath)) {
@@ -321,7 +345,7 @@ if ($action === 'download_submission') {
         exit('File not found on server disk.');
     }
 
-    $origName = $sub['file_name'] ?: basename($fullPath);
+    $origName = $origName ?: basename($fullPath);
     $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
     $mimes = [
         'pdf'  => 'application/pdf',
@@ -337,12 +361,17 @@ if ($action === 'download_submission') {
         'webp' => 'image/webp',
         'gif'  => 'image/gif',
         'zip'  => 'application/zip',
-        'txt'  => 'text/plain'
+        'txt'  => 'text/plain; charset=utf-8',
+        'sql'  => 'text/plain; charset=utf-8',
+        'json' => 'application/json; charset=utf-8',
+        'csv'  => 'text/csv; charset=utf-8'
     ];
     $contentType = $mimes[$ext] ?? 'application/octet-stream';
+    $isInline = (!empty($_GET['inline']) || !empty($_GET['view']) || $action === 'view_submission');
+    $disposition = $isInline ? 'inline' : 'attachment';
 
     header('Content-Type: ' . $contentType);
-    header('Content-Disposition: attachment; filename="' . addslashes($origName) . '"');
+    header('Content-Disposition: ' . $disposition . '; filename="' . addslashes($origName) . '"');
     header('Content-Length: ' . filesize($fullPath));
     header('Cache-Control: private, max-age=0, must-revalidate');
     readfile($fullPath);
@@ -406,6 +435,21 @@ if ($action === 'get_courses' || ($method === 'GET' && empty($action))) {
     $asgsByCourse = [];
     foreach ($allAsgs as $a) {
         $sub = $subsByAsg[$a['id']] ?? null;
+        $attachedFiles = [];
+        if ($sub) {
+            if (!empty($sub['attachments_json'])) {
+                $dec = json_decode($sub['attachments_json'], true);
+                if (is_array($dec)) $attachedFiles = $dec;
+            }
+            if (empty($attachedFiles) && !empty($sub['file_name'])) {
+                $attachedFiles[] = [
+                    'name' => $sub['file_name'],
+                    'path' => $sub['file_path'] ?? '',
+                    'size' => $sub['file_size'] ?? '',
+                    'type' => $sub['file_type'] ?? ''
+                ];
+            }
+        }
         $cCode = strtoupper(trim($a['course_code']));
         $asgsByCourse[$cCode][] = [
             'id'                  => $a['id'],
@@ -421,18 +465,24 @@ if ($action === 'get_courses' || ($method === 'GET' && empty($action))) {
             'submitted_file_name' => $sub['file_name'] ?? null,
             'submitted_file_path' => $sub['file_path'] ?? null,
             'submitted_file_size' => $sub['file_size'] ?? null,
+            'files'               => $attachedFiles,
             'submission_id'       => $sub['id'] ?? null,
             'submitted_at'        => $sub['submitted_at'] ?? null,
             'created_at'          => substr($a['created_at'], 0, 10)
         ];
     }
 
-    // Active live sessions check
+    // Active live sessions check (Strictly section-isolated)
     $elmsData = loadElmsData($elmsFile);
     $liveSessionsByCourse = [];
     foreach ($elmsData['courses'] as $ec) {
-        if (!empty($ec['live_session'])) {
-            $liveSessionsByCourse[strtoupper(trim($ec['code']))] = $ec['live_session'];
+        if (!empty($ec['live_session']) && !empty($ec['live_session']['is_active'])) {
+            $cSecClean = preg_replace('/[^A-Za-z0-9]/', '', strtoupper($ec['section'] ?? ''));
+            $cKey = strtoupper(trim($ec['code'])) . '__' . $cSecClean;
+            $liveSessionsByCourse[$cKey] = $ec['live_session'];
+            if (!empty($ec['id'])) {
+                $liveSessionsByCourse[$ec['id']] = $ec['live_session'];
+            }
         }
     }
 
@@ -451,12 +501,26 @@ if ($action === 'get_courses' || ($method === 'GET' && empty($action))) {
         }
 
         $code = strtoupper(trim($c['code']));
-        $live = $liveSessionsByCourse[$code] ?? [
-            'is_active'            => (bool)($c['is_live'] ?? false),
-            'topic'                => $c['title'] . ' Live Lecture',
-            'meeting_link'         => $c['meeting_link'] ?? '',
-            'allowed_section'      => $c['section'] ?? '2A'
-        ];
+        $cSecClean = preg_replace('/[^A-Za-z0-9]/', '', strtoupper($c['section'] ?? ''));
+        $cKey = $code . '__' . $cSecClean;
+        $live = $liveSessionsByCourse[$c['id']] ?? $liveSessionsByCourse[$cKey] ?? null;
+
+        if ($live && !empty($live['is_active'])) {
+            $allowedSecClean = preg_replace('/[^A-Za-z0-9]/', '', strtoupper($live['allowed_section'] ?? ''));
+            if (!empty($allowedSecClean) && !empty($cSecClean) && strpos($cSecClean, $allowedSecClean) === false && strpos($allowedSecClean, $cSecClean) === false) {
+                $live = null;
+            }
+        }
+
+        if (!$live) {
+            $live = [
+                'is_active'            => (bool)($c['is_live'] ?? false),
+                'topic'                => $c['title'] . ' Live Lecture',
+                'meeting_link'         => $c['meeting_link'] ?? '',
+                'allowed_section'      => $c['section'] ?? '2A'
+            ];
+        }
+
         $isLive = !empty($live['is_active']);
         $isLiveForMe = false;
         if ($isLive) {
@@ -714,48 +778,81 @@ if ($action === 'submit_assignment') {
         mkdir($uploadDir, 0755, true);
     }
 
-    $filePath = null;
-    $fileName = null;
-    $fileType = null;
-    $fileSize = null;
+    $attachments = [];
+    $allowedExts = ['pdf', 'docx', 'doc', 'pptx', 'ppt', 'xlsx', 'xls', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'zip', 'txt', 'sql', 'csv'];
 
-    // Check for student file upload (supports all image types, PDF, Word DOCX, ZIP, etc.)
-    $uploadFile = $_FILES['submission_file'] ?? $_FILES['file'] ?? null;
-    if ($uploadFile && $uploadFile['error'] === UPLOAD_ERR_OK) {
-        $origName = basename($uploadFile['name']);
+    // 1. Process multiple files or single file upload
+    $fileList = [];
+    if (isset($_FILES['submission_files']) && is_array($_FILES['submission_files']['name'])) {
+        $count = count($_FILES['submission_files']['name']);
+        for ($i = 0; $i < $count; $i++) {
+            if ($_FILES['submission_files']['error'][$i] === UPLOAD_ERR_OK) {
+                $fileList[] = [
+                    'name'     => $_FILES['submission_files']['name'][$i],
+                    'tmp_name' => $_FILES['submission_files']['tmp_name'][$i],
+                    'size'     => $_FILES['submission_files']['size'][$i]
+                ];
+            }
+        }
+    }
+    
+    // Also check single file inputs (submission_file or file)
+    $singleFile = $_FILES['submission_file'] ?? $_FILES['file'] ?? null;
+    if ($singleFile && $singleFile['error'] === UPLOAD_ERR_OK) {
+        $fileList[] = $singleFile;
+    }
+
+    foreach ($fileList as $f) {
+        $origName = basename($f['name']);
         $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
-
-        $allowedExts = ['pdf', 'docx', 'doc', 'pptx', 'ppt', 'xlsx', 'xls', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'zip', 'txt', 'sql'];
         if (!in_array($ext, $allowedExts)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'File extension .' . $ext . ' not allowed. Allowed formats: Images (PNG, JPG, WebP), PDF, Word DOCX, PPTX, Excel, or ZIP.']);
-            exit;
+            continue;
         }
 
         $safeFileName = 'sub_' . time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . '.' . $ext;
         $destPath = $uploadDir . DIRECTORY_SEPARATOR . $safeFileName;
 
-        if (!move_uploaded_file($uploadFile['tmp_name'], $destPath)) {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'error' => 'Failed to save student submission file on server.']);
-            exit;
+        if (move_uploaded_file($f['tmp_name'], $destPath)) {
+            $bytes = filesize($destPath);
+            $fSize = ($bytes >= 1048576) ? round($bytes / 1048576, 1) . ' MB' : round($bytes / 1024, 0) . ' KB';
+            $fType = in_array($ext, ['png', 'jpg', 'jpeg', 'webp', 'gif']) ? 'image' : $ext;
+            $attachments[] = [
+                'file_name' => $origName,
+                'file_path' => 'uploads/submissions/' . $safeFileName,
+                'file_type' => $fType,
+                'file_size' => $fSize
+            ];
         }
+    }
 
-        $filePath = 'uploads/submissions/' . $safeFileName;
-        $fileName = $origName;
-        $fileType = in_array($ext, ['png', 'jpg', 'jpeg', 'webp', 'gif']) ? 'image' : $ext;
-        $bytes = filesize($destPath);
-        $fileSize = ($bytes >= 1048576) ? round($bytes / 1048576, 1) . ' MB' : round($bytes / 1024, 0) . ' KB';
+    $filePath = null;
+    $fileName = null;
+    $fileType = null;
+    $fileSize = null;
+    $attachmentsJson = !empty($attachments) ? json_encode($attachments, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : null;
+
+    if (!empty($attachments)) {
+        $filePath = $attachments[0]['file_path'];
+        $fileName = (count($attachments) > 1) 
+            ? ($attachments[0]['file_name'] . ' (+' . (count($attachments) - 1) . ' more)') 
+            : $attachments[0]['file_name'];
+        $fileType = $attachments[0]['file_type'];
+        $fileSize = $attachments[0]['file_size'];
     }
 
     if (empty($filePath) && empty($link)) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Please attach a file (Image, PDF, Word DOCX, ZIP) or provide a submission link.']);
+        echo json_encode(['success' => false, 'error' => 'Please attach at least one proof file (Image, PDF, Word DOCX, ZIP) or provide a submission link.']);
         exit;
     }
 
+    // Always extract real collegiate name (e.g. JILO DERRAMAS -> DERRAMAS, JILO)
+    $studentRealName = !empty($_SESSION['name']) ? $_SESSION['name'] : $userName;
+    $parsedName = parseCollegiateName($studentRealName);
+    $officialDisplayName = $parsedName['formatted'] ?: $studentRealName;
+
     // Check if student already has a submission record
-    $stmtCheck = $db->prepare("SELECT id, file_path, file_name, file_type, file_size FROM lms_submissions WHERE assignment_id = ? AND (student_number = ? OR LOWER(student_email) = ?)");
+    $stmtCheck = $db->prepare("SELECT id, file_path, file_name, file_type, file_size, attachments_json FROM lms_submissions WHERE assignment_id = ? AND (student_number = ? OR LOWER(student_email) = ?)");
     $stmtCheck->execute([$asgId, $studentNumber, strtolower($userEmail)]);
     $existing = $stmtCheck->fetch(PDO::FETCH_ASSOC);
 
@@ -765,19 +862,20 @@ if ($action === 'submit_assignment') {
         $finalName = $fileName ?: $existing['file_name'];
         $finalType = $fileType ?: $existing['file_type'];
         $finalSize = $fileSize ?: $existing['file_size'];
+        $finalAttJson = $attachmentsJson ?: $existing['attachments_json'];
 
         $upd = $db->prepare("UPDATE lms_submissions 
-                              SET file_path = ?, file_name = ?, file_type = ?, file_size = ?, submitted_link = ?, notes = ?, submitted_at = NOW(), status = 'Submitted' 
+                              SET student_name = ?, file_path = ?, file_name = ?, file_type = ?, file_size = ?, attachments_json = ?, submitted_link = ?, notes = ?, submitted_at = NOW(), status = 'Submitted' 
                               WHERE id = ?");
-        $upd->execute([$finalPath, $finalName, $finalType, $finalSize, $link, $notes, $subId]);
+        $upd->execute([$officialDisplayName, $finalPath, $finalName, $finalType, $finalSize, $finalAttJson, $link, $notes, $subId]);
     } else {
         $subId = 'sub-' . substr(bin2hex(random_bytes(4)), 0, 8);
-        $ins = $db->prepare("INSERT INTO lms_submissions (id, assignment_id, course_code, student_number, student_name, student_email, file_path, file_name, file_type, file_size, submitted_link, notes, submitted_at, status)
-                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'Submitted')");
+        $ins = $db->prepare("INSERT INTO lms_submissions (id, assignment_id, course_code, student_number, student_name, student_email, file_path, file_name, file_type, file_size, attachments_json, submitted_link, notes, submitted_at, status)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'Submitted')");
         $ins->execute([
-            $subId, $asgId, $courseCode, $studentNumber, $userName,
+            $subId, $asgId, $courseCode, $studentNumber, $officialDisplayName,
             $userEmail ?: ($studentNumber . '@navotaspolytechniccollege.edu.ph'),
-            $filePath, $fileName, $fileType, $fileSize, $link, $notes
+            $filePath, $fileName, $fileType, $fileSize, $attachmentsJson, $link, $notes
         ]);
     }
 
@@ -790,6 +888,7 @@ if ($action === 'submit_assignment') {
             'course_code'    => $courseCode,
             'file_name'      => $fileName,
             'file_size'      => $fileSize,
+            'attachments'    => $attachments,
             'submitted_link' => $link,
             'submitted_at'   => date('Y-m-d H:i:s'),
             'status'         => 'Submitted'
@@ -798,7 +897,7 @@ if ($action === 'submit_assignment') {
     exit;
 }
 
-// ─── 5. GET: Retrieve Submissions List (Faculty / Admin -> MySQL) ──────────────
+// ─── 5. GET: Retrieve Submissions List (Faculty / Admin -> MySQL with A-Z Last Name Sorting) ──
 if ($action === 'get_submissions') {
     if (!in_array($userRole, ['teacher', 'faculty', 'admin', 'registrar'])) {
         http_response_code(403);
@@ -844,6 +943,38 @@ if ($action === 'get_submissions') {
         $subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Process real collegiate last names, unpack multiple files, and sort alphabetically (A-Z) by Last Name
+    foreach ($subs as &$s) {
+        $parsed = parseCollegiateName($s['student_name'] ?? '');
+        $s['last_name'] = $parsed['last_name'];
+        $s['first_name'] = $parsed['first_name'];
+        $s['formatted_name'] = $parsed['formatted'] ?: ($s['student_name'] ?? '');
+
+        // Unpack multiple files
+        $files = [];
+        if (!empty($s['attachments_json'])) {
+            $dec = json_decode($s['attachments_json'], true);
+            if (is_array($dec)) $files = $dec;
+        }
+        if (empty($files) && !empty($s['file_path'])) {
+            $files[] = [
+                'file_name' => $s['file_name'] ?: basename($s['file_path']),
+                'file_path' => $s['file_path'],
+                'file_type' => $s['file_type'] ?? 'file',
+                'file_size' => $s['file_size'] ?? ''
+            ];
+        }
+        $s['files'] = $files;
+    }
+    unset($s);
+
+    // Strict alphabetical (A to Z) sorting by student's real LAST NAME
+    usort($subs, function ($a, $b) {
+        $lastCmp = strcasecmp($a['last_name'] ?? '', $b['last_name'] ?? '');
+        if ($lastCmp !== 0) return $lastCmp;
+        return strcasecmp($a['first_name'] ?? '', $b['first_name'] ?? '');
+    });
+
     echo json_encode([
         'success'     => true,
         'submissions' => $subs,
@@ -883,7 +1014,7 @@ if ($action === 'grade_submission') {
     exit;
 }
 
-// ─── 7. POST: Toggle Live Virtual Classroom ON/OFF (Teacher / Admin) ─────────
+// ─── 7. POST: Toggle Live Virtual Classroom ON/OFF (Strictly Section-Isolated) ─
 if ($action === 'toggle_live_class') {
     if (!in_array($userRole, ['teacher', 'faculty', 'admin', 'registrar'])) {
         http_response_code(403);
@@ -891,33 +1022,46 @@ if ($action === 'toggle_live_class') {
         exit;
     }
 
-    $courseCode = trim($_POST['course_code'] ?? $input['course_code'] ?? '');
-    $state = strtolower(trim($_POST['state'] ?? $input['state'] ?? 'start')); // 'start' or 'end'
-    $topic = trim($_POST['topic'] ?? $input['topic'] ?? '');
-    $agenda = trim($_POST['agenda'] ?? $input['agenda'] ?? '');
-    $platform = 'plugnmeet';
-    $meetingLink = trim($_POST['meeting_link'] ?? $input['meeting_link'] ?? '');
-    $gracePeriod = max(5, min(120, intval($_POST['grace_period'] ?? $input['grace_period'] ?? 15)));
+    $courseCode    = trim($_POST['course_code'] ?? $input['course_code'] ?? '');
+    $courseId      = trim($_POST['course_id'] ?? $input['course_id'] ?? '');
+    $targetSection = trim($_POST['section'] ?? $input['section'] ?? '');
+    $state         = strtolower(trim($_POST['state'] ?? $input['state'] ?? 'start')); // 'start' or 'end'
+    $topic         = trim($_POST['topic'] ?? $input['topic'] ?? '');
+    $agenda        = trim($_POST['agenda'] ?? $input['agenda'] ?? '');
+    $platform      = 'plugnmeet';
+    $gracePeriod   = max(5, min(120, intval($_POST['grace_period'] ?? $input['grace_period'] ?? 15)));
 
-    if (empty($courseCode)) {
+    if (empty($courseCode) && empty($courseId)) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Course code is required.']);
+        echo json_encode(['success' => false, 'error' => 'Course code or course ID is required.']);
         exit;
     }
 
     $data = loadElmsData($elmsFile);
+    $targetSecClean = preg_replace('/[^A-Za-z0-9]/', '', strtoupper($targetSection));
     $foundCourse = null;
 
     foreach ($data['courses'] as &$c) {
-        if ($c['code'] === $courseCode || ($c['id'] ?? '') === $courseCode) {
+        $cSecClean = preg_replace('/[^A-Za-z0-9]/', '', strtoupper($c['section'] ?? ''));
+        $match = false;
+
+        if (!empty($courseId) && ($c['id'] ?? '') === $courseId) {
+            $match = true;
+        } elseif (strtoupper(trim($c['code'])) === strtoupper(trim($courseCode))) {
+            if (!empty($targetSecClean)) {
+                $match = (strpos($cSecClean, $targetSecClean) !== false || strpos($targetSecClean, $cSecClean) !== false);
+            } else {
+                $match = true;
+            }
+        }
+
+        if ($match) {
             $secCode = preg_replace('/[^A-Za-z0-9]/', '', $c['section'] ?? '2A');
             $subjCode = preg_replace('/[^A-Za-z0-9]/', '', $c['code']);
-            $sessionCode = strtoupper("NPC-{$subjCode}-" . date('Y-m-d'));
+            $sessionCode = strtoupper("NPC-{$subjCode}-SEC{$secCode}-" . date('Y-m-d'));
 
             if ($state === 'start') {
                 $roomId = 'NPC-ELMS-' . $subjCode . '-SEC' . $secCode . '-' . substr(bin2hex(random_bytes(3)), 0, 6);
-
-                $platform = 'plugnmeet';
                 $timerMode = trim($_POST['timer_mode'] ?? $input['timer_mode'] ?? 'unlimited');
                 $durationMinutes = intval($_POST['duration_minutes'] ?? $input['duration_minutes'] ?? 0);
                 $meetingLink = "/live_room.php?session_code=" . rawurlencode($sessionCode) . "&course_code=" . rawurlencode($c['code']) . "&room_id=" . rawurlencode($roomId);
@@ -947,6 +1091,15 @@ if ($action === 'toggle_live_class') {
                     'is_attendance_locked' => false
                 ];
 
+                // Synchronize with MySQL classes table
+                $db = getDB();
+                if (!empty($courseId)) {
+                    $db->prepare("UPDATE classes SET is_live = 1, meeting_link = ? WHERE id = ?")->execute([$meetingLink, $courseId]);
+                } else {
+                    $db->prepare("UPDATE classes SET is_live = 1, meeting_link = ? WHERE code = ? AND (section LIKE ? OR section = ?)")
+                       ->execute([$meetingLink, $c['code'], "%{$secCode}%", $c['section']]);
+                }
+
                 // Synchronize with Supabase attendance_sessions
                 require_once __DIR__ . '/../includes/supabase_helper.php';
                 supabaseServiceQuery("/rest/v1/attendance_sessions", 'POST', [[
@@ -974,6 +1127,15 @@ if ($action === 'toggle_live_class') {
                 $c['live_session']['is_active'] = false;
                 $c['live_session']['ended_at'] = date('Y-m-d H:i:s');
 
+                // Synchronize with MySQL classes table
+                $db = getDB();
+                if (!empty($courseId)) {
+                    $db->prepare("UPDATE classes SET is_live = 0 WHERE id = ?")->execute([$courseId]);
+                } else {
+                    $db->prepare("UPDATE classes SET is_live = 0 WHERE code = ? AND (section LIKE ? OR section = ?)")
+                       ->execute([$c['code'], "%{$secCode}%", $c['section']]);
+                }
+
                 // Synchronize with Supabase
                 require_once __DIR__ . '/../includes/supabase_helper.php';
                 supabaseServiceQuery(
@@ -983,7 +1145,7 @@ if ($action === 'toggle_live_class') {
                 );
             }
             $foundCourse = $c;
-            break;
+            break; // Strictly isolate: only the matching course section is updated!
         }
     }
     unset($c);

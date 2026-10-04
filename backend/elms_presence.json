@@ -204,5 +204,23 @@
             "check_in_at": "2026-09-30T21:00:04+00:00",
             "verified_via": "plugnmeet_verified"
         }
+    },
+    "AIS201-LIVE": {
+        "251505": {
+            "student_number": "251505",
+            "student_name": "Jilo Derramas",
+            "student_email": "jderramas251505@navotaspolytechniccollege.edu.ph",
+            "session_code": "AIS201-LIVE",
+            "status": "present",
+            "is_online": true,
+            "accumulated_seconds": 0,
+            "current_join_ts": 1791123585,
+            "last_joined_at": "2026-10-04T14:19:45+00:00",
+            "last_heartbeat": 1791123585,
+            "last_left_at": null,
+            "leave_count": 0,
+            "check_in_at": "2026-10-04T14:19:45+00:00",
+            "verified_via": "plugnmeet_verified"
+        }
     }
 }

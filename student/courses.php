@@ -217,46 +217,37 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
                 </div>
 
                 <!-- Existing submission preview if already turned in -->
-                <div id="sub-existing-card" class="hidden p-3 rounded-xl bg-status-success/10 border border-status-success/30 space-y-1.5">
+                <div id="sub-existing-card" class="hidden p-3.5 rounded-xl bg-status-success/10 border border-status-success/30 space-y-2">
                     <div class="flex items-center justify-between">
                         <span class="text-[11px] font-bold text-status-success flex items-center gap-1">
                             <span class="material-symbols-outlined text-[15px]">check_circle</span> Turned In Previously
                         </span>
                         <span class="text-[10px] font-mono text-on-surface-variant" id="sub-existing-time"></span>
                     </div>
-                    <div id="sub-existing-file-wrap" class="hidden">
-                        <a id="sub-existing-file-link" href="#" target="_blank" class="px-2.5 py-1 rounded-lg bg-surface border border-outline-variant text-primary font-bold text-xs inline-flex items-center gap-1.5 hover:bg-surface-container">
-                            <span class="material-symbols-outlined text-[14px]">download</span>
-                            <span id="sub-existing-file-name" class="truncate max-w-[200px]">Download Submitted File</span>
-                        </a>
+                    <div id="sub-existing-files-list" class="space-y-1.5">
+                        <!-- Populated dynamically with View in Browser and Download buttons -->
                     </div>
                 </div>
 
-                <!-- Google Classroom Style File Attachment Box -->
+                <!-- Google Classroom Style Multi-File Attachment Box -->
                 <div>
-                    <label class="block text-xs font-semibold text-primary mb-1">
-                        Attach File (Image, PDF, Word DOCX, PPTX, ZIP) <span class="text-error">*</span>
-                    </label>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-semibold text-primary">
+                            Attach File(s) / Proof of Activity <span class="text-error">*</span>
+                        </label>
+                        <span class="text-[10px] font-mono text-on-surface-variant">Upload 1, 2 or more files (e.g. Proof 1 &amp; Proof 2)</span>
+                    </div>
                     
                     <div id="sub-dropzone" class="border-2 border-dashed border-outline-variant hover:border-primary/60 rounded-2xl p-4 text-center bg-surface-container-low transition-colors cursor-pointer" onclick="document.getElementById('sub-file-input').click()">
                         <span class="material-symbols-outlined text-[30px] text-primary">cloud_upload</span>
-                        <p class="text-xs font-bold text-primary mt-1" id="sub-file-label">Click or Drag &amp; Drop your file here</p>
-                        <p class="text-[10px] text-on-surface-variant font-mono mt-0.5">Supports PNG, JPG, WebP, PDF, DOCX, XLSX, PPTX, ZIP (Up to 50MB)</p>
-                        <input type="file" id="sub-file-input" class="hidden" onchange="onStudentFileSelected(this)" accept="image/*,.pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.zip,.txt,.sql">
+                        <p class="text-xs font-bold text-primary mt-1" id="sub-file-label">Click or Drag &amp; Drop file(s) here</p>
+                        <p class="text-[10px] text-on-surface-variant font-mono mt-0.5">Supports PNG, JPG, WebP, PDF, DOCX, XLSX, PPTX, ZIP, SQL (Up to 50MB each)</p>
+                        <input type="file" id="sub-file-input" class="hidden" multiple onchange="onStudentFilesSelected(this)" accept="image/*,.pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.zip,.txt,.sql">
                     </div>
 
-                    <!-- Selected file preview card -->
-                    <div id="sub-file-preview" class="hidden mt-2 p-3 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between text-xs">
-                        <div class="flex items-center gap-2 truncate">
-                            <span class="material-symbols-outlined text-primary text-[18px] shrink-0" id="sub-file-icon">description</span>
-                            <div class="truncate">
-                                <p class="font-bold text-primary truncate" id="sub-file-name-display">—</p>
-                                <p class="text-[10px] font-mono text-on-surface-variant" id="sub-file-size-display">—</p>
-                            </div>
-                        </div>
-                        <button type="button" onclick="clearStudentFile()" class="p-1 rounded hover:bg-primary/20 text-red-500 cursor-pointer" title="Remove file">
-                            <span class="material-symbols-outlined text-[16px]">close</span>
-                        </button>
+                    <!-- Staged multi-file preview list -->
+                    <div id="sub-staged-files-list" class="space-y-2 mt-2.5">
+                        <!-- Populated dynamically with staged files and preview buttons -->
                     </div>
                 </div>
 
@@ -507,6 +498,47 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
         </div>
     </div>
 
+    <!-- ─── IN-BROWSER INTERACTIVE FILE PREVIEW MODAL (No Download Required) ─── -->
+    <div id="file-preview-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in" role="dialog" aria-modal="true">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl w-full max-w-5xl h-[88vh] flex flex-col shadow-2xl overflow-hidden relative">
+            <!-- Header bar -->
+            <div class="px-5 py-3.5 bg-surface-container-low border-b border-outline-variant/60 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[20px]" id="preview-modal-icon">visibility</span>
+                    </div>
+                    <div class="truncate">
+                        <h4 class="text-sm font-bold text-primary truncate" id="preview-modal-title">Document Preview</h4>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-primary-container text-on-primary" id="preview-modal-badge">PDF</span>
+                            <span class="text-[11px] font-mono text-on-surface-variant" id="preview-modal-size"></span>
+                            <span class="text-[11px] text-on-surface-variant/80 hidden sm:inline">· In-browser interactive preview (no download needed)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <a id="preview-modal-open-newtab" href="#" target="_blank" class="px-3 py-1.5 rounded-xl border border-outline-variant hover:bg-surface-container text-xs font-semibold text-on-surface inline-flex items-center gap-1 transition-colors">
+                        <span class="material-symbols-outlined text-[15px]">open_in_new</span> Open Tab
+                    </a>
+                    <a id="preview-modal-download-btn" href="#" download class="px-3 py-1.5 rounded-xl bg-primary text-on-primary hover:opacity-90 text-xs font-bold inline-flex items-center gap-1 transition-opacity shadow-xs">
+                        <span class="material-symbols-outlined text-[15px]">download</span> Download
+                    </a>
+                    <button type="button" onclick="closeFilePreviewModal()" class="p-1.5 rounded-xl hover:bg-surface-container text-on-surface-variant cursor-pointer transition-colors" title="Close Preview">
+                        <span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Viewer Body -->
+            <div id="preview-modal-body" class="flex-1 bg-surface overflow-hidden relative flex items-center justify-center">
+                <!-- Dynamically populated iframe, img, or text viewer -->
+                <div class="flex items-center justify-center p-8 text-on-surface-variant">
+                    <span class="material-symbols-outlined text-[24px] animate-spin mr-2">progress_activity</span> Loading file preview...
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ELMS Course Hub Logic -->
     <script>
         var COURSES_CACHE = [];
@@ -713,6 +745,8 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
                 var modulesHtml = '';
                 (c.modules || []).forEach(function (m) {
                     var icon = m.type === 'slides' ? 'slideshow' : (m.type === 'image' ? 'image' : 'description');
+                    var viewUrl = '/api/elms.php?action=view_material&id=' + encodeURIComponent(m.id) + '&inline=1';
+                    var dlUrl = '/api/elms.php?action=download_material&id=' + encodeURIComponent(m.id);
                     modulesHtml += '<div class="p-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container border border-outline-variant/40 flex items-center justify-between gap-3 transition-colors">' +
                                    '<div class="flex items-center gap-2 min-w-0">' +
                                    '<span class="material-symbols-outlined text-[18px] text-primary shrink-0">' + icon + '</span>' +
@@ -721,9 +755,14 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
                                    '<p class="text-[10px] font-mono text-on-surface-variant">' + (m.file_name || 'handout') + ' · ' + m.size + '</p>' +
                                    '</div>' +
                                    '</div>' +
-                                   '<a href="/api/elms.php?action=download_material&id=' + m.id + '" target="_blank" class="p-1.5 rounded-lg border border-outline-variant bg-surface hover:bg-primary hover:text-white text-primary transition-colors shrink-0" title="Download ' + m.title + '">' +
+                                   '<div class="flex items-center gap-1 shrink-0">' +
+                                   '<button type="button" onclick="openFilePreviewModal(\'' + viewUrl + '\', \'' + (m.file_name || m.title).replace(/'/g, "\\'") + '\', \'' + (m.type || '') + '\', \'' + (m.size || '') + '\')" class="p-1.5 rounded-lg border border-outline-variant bg-surface hover:bg-primary hover:text-white text-primary transition-colors cursor-pointer" title="View ' + m.title.replace(/'/g, "\\'") + ' without downloading">' +
+                                   '<span class="material-symbols-outlined text-[16px]">visibility</span>' +
+                                   '</button>' +
+                                   '<a href="' + dlUrl + '" download target="_blank" class="p-1.5 rounded-lg border border-outline-variant bg-surface hover:bg-primary hover:text-white text-primary transition-colors" title="Download ' + m.title.replace(/'/g, "\\'") + '">' +
                                    '<span class="material-symbols-outlined text-[16px]">download</span>' +
                                    '</a>' +
+                                   '</div>' +
                                    '</div>';
                 });
 
@@ -791,22 +830,45 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
                                       '</div>';
                     }
 
-                    var attachedFileHtml = '';
-                    if (asg.submitted_file_name) {
-                        attachedFileHtml = '<div class="mt-2.5 flex items-center gap-2">' +
-                                           '<a href="/api/elms.php?action=download_submission&id=' + asg.submission_id + '" target="_blank" class="px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs inline-flex items-center gap-1.5 border border-primary/25 shadow-2xs">' +
-                                           '<span class="material-symbols-outlined text-[15px]">attachment</span> ' + asg.submitted_file_name + ' <span class="text-[10px] font-mono text-on-surface-variant font-normal">(' + (asg.submitted_file_size || '') + ')</span>' +
-                                           '</a>' +
-                                           '</div>';
+                    var attachedFilesHtml = '';
+                    var files = (asg.files && asg.files.length) ? asg.files : [];
+                    if (files.length === 0 && asg.submitted_file_name) {
+                        files = [{
+                            name: asg.submitted_file_name,
+                            size: asg.submitted_file_size || '',
+                            type: ''
+                        }];
+                    }
+
+                    if (files.length > 0) {
+                        attachedFilesHtml = '<div class="mt-2.5 space-y-1.5">' +
+                                           '<p class="text-[11px] font-semibold text-primary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">attach_file</span> Submitted Work (' + files.length + ' file' + (files.length > 1 ? 's' : '') + '):</p>' +
+                                           '<div class="flex flex-wrap gap-2">';
+                        files.forEach(function(f, fIdx) {
+                            var viewUrl = '/api/elms.php?action=view_submission&id=' + encodeURIComponent(asg.submission_id) + '&file_idx=' + fIdx + '&inline=1';
+                            var dlUrl = '/api/elms.php?action=download_submission&id=' + encodeURIComponent(asg.submission_id) + '&file_idx=' + fIdx;
+                            attachedFilesHtml += '<div class="px-2.5 py-1.5 rounded-xl bg-primary/10 border border-primary/25 flex items-center gap-2 text-xs">' +
+                                                '<span class="material-symbols-outlined text-[15px] text-primary">description</span>' +
+                                                '<span class="font-bold text-primary truncate max-w-[150px]" title="' + f.name.replace(/"/g, '&quot;') + '">' + f.name + '</span>' +
+                                                (f.size ? '<span class="text-[10px] font-mono text-on-surface-variant">(' + f.size + ')</span>' : '') +
+                                                '<button type="button" onclick="openFilePreviewModal(\'' + viewUrl + '\', \'' + f.name.replace(/'/g, "\\'") + '\', \'' + (f.type || '') + '\', \'' + (f.size || '') + '\')" class="px-2 py-0.5 rounded-lg bg-surface hover:bg-primary hover:text-white text-primary text-[11px] font-bold border border-outline-variant flex items-center gap-0.5 cursor-pointer shadow-2xs" title="View inside browser (no download needed)">' +
+                                                '<span class="material-symbols-outlined text-[13px]">visibility</span> View' +
+                                                '</button>' +
+                                                '<a href="' + dlUrl + '" download target="_blank" class="p-1 rounded-lg bg-surface hover:bg-surface-container text-on-surface text-[11px] border border-outline-variant flex items-center gap-0.5" title="Direct download">' +
+                                                '<span class="material-symbols-outlined text-[13px]">download</span>' +
+                                                '</a>' +
+                                                '</div>';
+                        });
+                        attachedFilesHtml += '</div></div>';
                     }
 
                     var actionBtn = '';
                     if (asg.status === 'Graded') {
                         actionBtn = '<span class="px-3 py-1.5 rounded-xl border border-outline-variant text-xs font-mono font-semibold text-status-success">Evaluated</span>';
                     } else if (asg.status === 'Submitted') {
-                        actionBtn = '<button type="button" onclick="openSubmissionModal(\'' + asg.id + '\', \'' + asg.title.replace(/'/g, "\\'") + '\', \'' + c.code + '\', \'' + (asg.instructions || '').replace(/'/g, "\\'") + '\', \'' + (asg.submitted_file_name || '') + '\', \'' + (asg.submission_id || '') + '\', \'' + (asg.submitted_link || '') + '\', \'' + (asg.submitted_at || '') + '\')" class="px-3 py-1.5 rounded-xl border border-outline-variant hover:bg-surface-container text-primary text-xs font-bold transition-all inline-flex items-center gap-1 cursor-pointer"><span class="material-symbols-outlined text-[14px]">edit</span> Resubmit</button>';
+                        actionBtn = '<button type="button" onclick="openSubmissionModal(\'' + asg.id + '\')" class="px-3 py-1.5 rounded-xl border border-outline-variant hover:bg-surface-container text-primary text-xs font-bold transition-all inline-flex items-center gap-1 cursor-pointer"><span class="material-symbols-outlined text-[14px]">edit</span> Resubmit</button>';
                     } else {
-                        actionBtn = '<button type="button" onclick="openSubmissionModal(\'' + asg.id + '\', \'' + asg.title.replace(/'/g, "\\'") + '\', \'' + c.code + '\', \'' + (asg.instructions || '').replace(/'/g, "\\'") + '\')" class="px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:opacity-90 transition-all inline-flex items-center gap-1.5 shadow-xs cursor-pointer"><span class="material-symbols-outlined text-[15px]">upload</span> Turn In</button>';
+                        actionBtn = '<button type="button" onclick="openSubmissionModal(\'' + asg.id + '\')" class="px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:opacity-90 transition-all inline-flex items-center gap-1.5 shadow-xs cursor-pointer"><span class="material-symbols-outlined text-[15px]">upload</span> Turn In</button>';
                     }
 
                     html += '<div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-surface-container-low transition-colors">' +
@@ -819,7 +881,7 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
                             '</div>' +
                             '<h4 class="text-sm font-bold text-on-surface">' + asg.title + '</h4>' +
                             '<p class="text-xs text-on-surface-variant mt-0.5">Total Points: ' + asg.points + ' pts' + (asg.instructions ? ' · ' + asg.instructions : '') + '</p>' +
-                            attachedFileHtml +
+                            attachedFilesHtml +
                             remarksHtml +
                             '</div>' +
                             '<div class="shrink-0 flex items-center">' +
@@ -832,71 +894,162 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
             list.innerHTML = html;
         }
 
-        function onStudentFileSelected(input) {
-            var dropzone = document.getElementById('sub-dropzone');
-            var preview = document.getElementById('sub-file-preview');
-            var nameDisplay = document.getElementById('sub-file-name-display');
-            var sizeDisplay = document.getElementById('sub-file-size-display');
-            var iconDisplay = document.getElementById('sub-file-icon');
+        // ─── MULTI-FILE ATTACHMENT & IN-BROWSER PREVIEW SYSTEM ───
+        var STAGED_STUDENT_FILES = [];
 
-            if (input.files && input.files[0]) {
-                var f = input.files[0];
-                var sz = (f.size >= 1048576) ? (f.size / 1048576).toFixed(1) + ' MB' : Math.round(f.size / 1024) + ' KB';
-                nameDisplay.textContent = f.name;
-                sizeDisplay.textContent = sz;
-                
-                var ext = f.name.split('.').pop().toLowerCase();
-                if (['png', 'jpg', 'jpeg', 'webp', 'gif'].includes(ext)) {
-                    iconDisplay.textContent = 'image';
-                } else if (['pdf'].includes(ext)) {
-                    iconDisplay.textContent = 'picture_as_pdf';
-                } else if (['zip', 'rar'].includes(ext)) {
-                    iconDisplay.textContent = 'folder_zip';
-                } else {
-                    iconDisplay.textContent = 'description';
-                }
-
-                preview.classList.remove('hidden');
-                dropzone.classList.add('border-primary');
+        function onStudentFilesSelected(input) {
+            if (!input.files || input.files.length === 0) return;
+            for (var i = 0; i < input.files.length; i++) {
+                STAGED_STUDENT_FILES.push(input.files[i]);
             }
+            input.value = '';
+            renderStagedStudentFiles();
         }
 
-        function clearStudentFile() {
+        function removeStagedStudentFile(index) {
+            STAGED_STUDENT_FILES.splice(index, 1);
+            renderStagedStudentFiles();
+        }
+
+        function clearStudentFiles() {
+            STAGED_STUDENT_FILES = [];
             var input = document.getElementById('sub-file-input');
+            if (input) input.value = '';
+            renderStagedStudentFiles();
+        }
+
+        function renderStagedStudentFiles() {
+            var container = document.getElementById('sub-staged-files-list');
             var dropzone = document.getElementById('sub-dropzone');
-            var preview = document.getElementById('sub-file-preview');
-            input.value = '';
-            preview.classList.add('hidden');
-            dropzone.classList.remove('border-primary');
+            if (!container) return;
+
+            if (STAGED_STUDENT_FILES.length === 0) {
+                container.innerHTML = '';
+                if (dropzone) dropzone.classList.remove('border-primary');
+                return;
+            }
+
+            if (dropzone) dropzone.classList.add('border-primary');
+
+            var html = '';
+            STAGED_STUDENT_FILES.forEach(function(f, idx) {
+                var sz = (f.size >= 1048576) ? (f.size / 1048576).toFixed(1) + ' MB' : Math.round(f.size / 1024) + ' KB';
+                var ext = f.name.split('.').pop().toLowerCase();
+                var icon = 'description';
+                if (['png', 'jpg', 'jpeg', 'webp', 'gif'].includes(ext)) icon = 'image';
+                else if (ext === 'pdf') icon = 'picture_as_pdf';
+                else if (['zip', 'rar'].includes(ext)) icon = 'folder_zip';
+                else if (['txt', 'sql', 'json', 'js', 'py'].includes(ext)) icon = 'code';
+
+                html += '<div class="p-2.5 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-between text-xs gap-2">' +
+                        '<div class="flex items-center gap-2 truncate min-w-0">' +
+                        '<span class="material-symbols-outlined text-primary text-[18px] shrink-0">' + icon + '</span>' +
+                        '<div class="truncate">' +
+                        '<p class="font-bold text-primary truncate">' + f.name + '</p>' +
+                        '<p class="text-[10px] font-mono text-on-surface-variant">Proof #' + (idx + 1) + ' · ' + sz + '</p>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="flex items-center gap-1.5 shrink-0">' +
+                        '<button type="button" onclick="previewStagedFile(' + idx + ')" class="px-2.5 py-1 rounded-lg border border-primary/30 bg-surface hover:bg-primary hover:text-white text-primary text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer transition-colors shadow-2xs" title="Preview file in browser">' +
+                        '<span class="material-symbols-outlined text-[14px]">visibility</span> View' +
+                        '</button>' +
+                        '<button type="button" onclick="removeStagedStudentFile(' + idx + ')" class="p-1 rounded-lg hover:bg-red-500/20 text-red-500 cursor-pointer" title="Remove proof">' +
+                        '<span class="material-symbols-outlined text-[16px]">close</span>' +
+                        '</button>' +
+                        '</div>' +
+                        '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        function previewStagedFile(idx) {
+            var f = STAGED_STUDENT_FILES[idx];
+            if (!f) return;
+            var blobUrl = URL.createObjectURL(f);
+            var sz = (f.size >= 1048576) ? (f.size / 1048576).toFixed(1) + ' MB' : Math.round(f.size / 1024) + ' KB';
+            openFilePreviewModal(blobUrl, f.name, f.type, sz);
+        }
+
+        function findCourseAndAssignment(asgId) {
+            for (var i = 0; i < COURSES_CACHE.length; i++) {
+                var c = COURSES_CACHE[i];
+                if (c.assignments) {
+                    for (var j = 0; j < c.assignments.length; j++) {
+                        if (String(c.assignments[j].id) === String(asgId)) {
+                            return { course: c, assignment: c.assignments[j] };
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         function openSubmissionModal(asgId, title, course, instructions, existingFile, subId, existingLink, existingTime) {
             var modal = document.getElementById('submission-modal');
+            var found = findCourseAndAssignment(asgId);
+            var asg = found ? found.assignment : null;
+            var c = found ? found.course : null;
+
+            title = title || (asg ? asg.title : 'Assignment Submission');
+            course = course || (c ? c.code : 'Course');
+            instructions = instructions || (asg ? asg.instructions : '');
+            existingLink = existingLink || (asg ? asg.submitted_link : '');
+            subId = subId || (asg ? asg.submission_id : '');
+            existingTime = existingTime || (asg ? asg.submitted_at : '');
+
             document.getElementById('sub-asg-id').value = asgId;
             document.getElementById('sub-asg-title').textContent = title;
-            document.getElementById('sub-asg-instructions').textContent = instructions || 'Follow professor instructions and submit clear work.';
+            document.getElementById('sub-asg-instructions').textContent = instructions || 'Follow professor instructions and submit clear proof of coursework.';
             document.getElementById('sub-course-label').textContent = course;
             document.getElementById('sub-link').value = existingLink || '';
             document.getElementById('sub-notes').value = '';
-            clearStudentFile();
+            clearStudentFiles();
 
-            // If there's an existing submission preview
+            // Handle previous submission files
             var existingCard = document.getElementById('sub-existing-card');
-            var fileWrap = document.getElementById('sub-existing-file-wrap');
-            var fileLink = document.getElementById('sub-existing-file-link');
-            var fileNameSpan = document.getElementById('sub-existing-file-name');
+            var filesList = document.getElementById('sub-existing-files-list');
             var timeSpan = document.getElementById('sub-existing-time');
 
-            if (existingFile && existingFile !== 'null' && existingFile !== '') {
+            var prevFiles = (asg && asg.files && asg.files.length) ? asg.files : [];
+            if (prevFiles.length === 0 && (existingFile || (asg && asg.submitted_file_name))) {
+                var fn = existingFile || asg.submitted_file_name;
+                var fsz = asg ? asg.submitted_file_size : '';
+                prevFiles = [{ name: fn, size: fsz, type: '' }];
+            }
+
+            if (prevFiles.length > 0) {
                 existingCard.classList.remove('hidden');
-                fileWrap.classList.remove('hidden');
-                fileLink.href = '/api/elms.php?action=download_submission&id=' + encodeURIComponent(subId);
-                fileNameSpan.textContent = existingFile;
                 timeSpan.textContent = existingTime || 'Recorded';
+                
+                var prevHtml = '';
+                prevFiles.forEach(function(f, idx) {
+                    var viewUrl = '/api/elms.php?action=view_submission&id=' + encodeURIComponent(subId) + '&file_idx=' + idx + '&inline=1';
+                    var dlUrl = '/api/elms.php?action=download_submission&id=' + encodeURIComponent(subId) + '&file_idx=' + idx;
+                    prevHtml += '<div class="p-2.5 rounded-xl bg-surface border border-outline-variant/60 flex items-center justify-between text-xs gap-2">' +
+                                '<div class="flex items-center gap-2 truncate min-w-0">' +
+                                '<span class="material-symbols-outlined text-primary text-[18px] shrink-0">task</span>' +
+                                '<div class="truncate">' +
+                                '<p class="font-bold text-primary truncate">' + f.name + '</p>' +
+                                '<p class="text-[10px] font-mono text-on-surface-variant">Proof #' + (idx + 1) + (f.size ? ' · ' + f.size : '') + '</p>' +
+                                '</div>' +
+                                '</div>' +
+                                '<div class="flex items-center gap-1.5 shrink-0">' +
+                                '<button type="button" onclick="openFilePreviewModal(\'' + viewUrl + '\', \'' + f.name.replace(/'/g, "\\'") + '\', \'' + (f.type || '') + '\', \'' + (f.size || '') + '\')" class="px-2.5 py-1 rounded-lg border border-primary/30 bg-surface hover:bg-primary hover:text-white text-primary text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs" title="View file in browser (no download needed)">' +
+                                '<span class="material-symbols-outlined text-[14px]">visibility</span> View' +
+                                '</button>' +
+                                '<a href="' + dlUrl + '" download target="_blank" class="p-1 rounded-lg border border-outline-variant bg-surface hover:bg-surface-container text-on-surface text-[11px] flex items-center gap-1" title="Direct download">' +
+                                '<span class="material-symbols-outlined text-[14px]">download</span>' +
+                                '</a>' +
+                                '</div>' +
+                                '</div>';
+                });
+                filesList.innerHTML = prevHtml;
+
                 document.getElementById('sub-submit-btn').innerHTML = '<span class="material-symbols-outlined text-[16px]">sync</span> Update / Resubmit Work';
             } else {
                 existingCard.classList.add('hidden');
-                fileWrap.classList.add('hidden');
+                filesList.innerHTML = '';
                 document.getElementById('sub-submit-btn').innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span> Turn In Assignment';
             }
 
@@ -913,13 +1066,12 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
         async function handleAssignmentSubmit(e) {
             e.preventDefault();
             var asgId = document.getElementById('sub-asg-id').value;
-            var fileInput = document.getElementById('sub-file-input');
             var link = document.getElementById('sub-link').value.trim();
             var notes = document.getElementById('sub-notes').value.trim();
             var btn = document.getElementById('sub-submit-btn');
 
-            if ((!fileInput.files || !fileInput.files[0]) && !link && document.getElementById('sub-existing-card').classList.contains('hidden')) {
-                alert('Please attach your assignment file (Image, PDF, Word, etc.) or provide a submission link.');
+            if (STAGED_STUDENT_FILES.length === 0 && !link && document.getElementById('sub-existing-card').classList.contains('hidden')) {
+                alert('Please attach your assignment file(s) (e.g. Proof 1, Proof 2) or provide a submission link.');
                 return;
             }
 
@@ -931,8 +1083,11 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
                 formData.append('assignment_id', asgId);
                 formData.append('link', link);
                 formData.append('notes', notes);
-                if (fileInput.files && fileInput.files[0]) {
-                    formData.append('submission_file', fileInput.files[0]);
+                STAGED_STUDENT_FILES.forEach(function(file) {
+                    formData.append('submission_files[]', file);
+                });
+                if (STAGED_STUDENT_FILES.length > 0) {
+                    formData.append('submission_file', STAGED_STUDENT_FILES[0]);
                 }
 
                 var res = await fetch('/api/elms.php?action=submit_assignment', {
@@ -956,6 +1111,97 @@ $PAGE_TITLE = 'Courses & LMS Learning Hub · NPC LMS';
                 btn.disabled = false;
                 btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span> Turn In Assignment';
             }
+        }
+
+        // ─── IN-BROWSER INTERACTIVE FILE PREVIEW MODAL ───
+        function openFilePreviewModal(fileUrl, fileName, fileType, fileSize) {
+            fileName = fileName || 'File Document';
+            fileType = (fileType || '').toLowerCase();
+            fileSize = fileSize || '';
+
+            var modal = document.getElementById('file-preview-modal');
+            var titleEl = document.getElementById('preview-modal-title');
+            var badgeEl = document.getElementById('preview-modal-badge');
+            var sizeEl = document.getElementById('preview-modal-size');
+            var iconEl = document.getElementById('preview-modal-icon');
+            var openTabBtn = document.getElementById('preview-modal-open-newtab');
+            var dlBtn = document.getElementById('preview-modal-download-btn');
+            var bodyEl = document.getElementById('preview-modal-body');
+
+            titleEl.textContent = fileName;
+            sizeEl.textContent = fileSize ? '(' + fileSize + ')' : '';
+            openTabBtn.href = fileUrl;
+
+            var dlUrl = fileUrl.replace(/([?&])(inline|view)=[^&]*/g, '');
+            if (dlUrl.indexOf('?') === -1) dlUrl += '?download=1';
+            else dlUrl += '&download=1';
+            dlBtn.href = dlUrl;
+            dlBtn.setAttribute('download', fileName);
+
+            var ext = fileName.split('.').pop().toLowerCase();
+            badgeEl.textContent = (ext || fileType || 'FILE').toUpperCase();
+
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
+                iconEl.textContent = 'image';
+            } else if (ext === 'pdf') {
+                iconEl.textContent = 'picture_as_pdf';
+            } else if (['txt', 'sql', 'json', 'csv', 'js', 'py', 'php', 'html', 'css'].includes(ext)) {
+                iconEl.textContent = 'code';
+            } else {
+                iconEl.textContent = 'description';
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
+                bodyEl.innerHTML = '<div class="w-full h-full p-4 sm:p-8 flex items-center justify-center bg-slate-950/20 overflow-auto">' +
+                                   '<img src="' + fileUrl + '" alt="' + fileName.replace(/"/g, '&quot;') + '" class="max-h-full max-w-full rounded-xl object-contain shadow-md border border-outline-variant/30">' +
+                                   '</div>';
+            } else if (ext === 'pdf') {
+                bodyEl.innerHTML = '<iframe src="' + fileUrl + '#toolbar=1&navpanes=0" class="w-full h-full border-0 bg-surface"></iframe>';
+            } else if (['txt', 'sql', 'json', 'csv', 'js', 'py', 'php', 'html', 'css'].includes(ext)) {
+                bodyEl.innerHTML = '<div class="w-full h-full p-6 overflow-auto bg-surface-container-lowest font-mono text-xs text-on-surface flex items-center justify-center">' +
+                                   '<span class="material-symbols-outlined text-[20px] animate-spin mr-2">progress_activity</span> Reading file contents...' +
+                                   '</div>';
+                fetch(fileUrl)
+                    .then(function(r) { return r.text(); })
+                    .then(function(txt) {
+                        var safeTxt = txt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        bodyEl.innerHTML = '<div class="w-full h-full p-6 overflow-auto bg-surface-container-lowest">' +
+                                           '<pre class="font-mono text-xs text-on-surface leading-relaxed whitespace-pre-wrap select-text">' + safeTxt + '</pre>' +
+                                           '</div>';
+                    })
+                    .catch(function(err) {
+                        bodyEl.innerHTML = '<div class="p-8 text-center text-error">Failed to load text preview: ' + err.message + '</div>';
+                    });
+            } else {
+                var fullFileUrl = window.location.origin + fileUrl;
+                bodyEl.innerHTML = '<div class="w-full h-full flex flex-col items-center justify-center p-8 text-center space-y-4">' +
+                                   '<div class="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">' +
+                                   '<span class="material-symbols-outlined text-[36px]">file_present</span>' +
+                                   '</div>' +
+                                   '<div>' +
+                                   '<h4 class="text-base font-bold text-primary">' + fileName + '</h4>' +
+                                   '<p class="text-xs text-on-surface-variant max-w-md mx-auto mt-1">This document format (' + ext.toUpperCase() + ') can be inspected via Google Docs Online Viewer or downloaded directly.</p>' +
+                                   '</div>' +
+                                   '<div class="flex flex-wrap items-center justify-center gap-3 pt-2">' +
+                                   '<a href="https://docs.google.com/viewer?url=' + encodeURIComponent(fullFileUrl) + '&embedded=true" target="_blank" class="px-4 py-2 rounded-xl bg-primary text-on-primary hover:opacity-90 text-xs font-bold inline-flex items-center gap-1.5 shadow-sm">' +
+                                   '<span class="material-symbols-outlined text-[16px]">visibility</span> Open Google Docs Viewer' +
+                                   '</a>' +
+                                   '<a href="' + dlUrl + '" download target="_blank" class="px-4 py-2 rounded-xl border border-outline-variant hover:bg-surface-container text-xs font-semibold text-on-surface inline-flex items-center gap-1.5">' +
+                                   '<span class="material-symbols-outlined text-[16px]">download</span> Direct Download (' + (fileSize || 'File') + ')' +
+                                   '</a>' +
+                                   '</div>' +
+                                   '</div>';
+            }
+        }
+
+        function closeFilePreviewModal() {
+            var modal = document.getElementById('file-preview-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.getElementById('preview-modal-body').innerHTML = '';
         }
 
         // ─── LIVE VIRTUAL CLASSROOM & VERIFIED CHECK-IN HANDLERS ───

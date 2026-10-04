@@ -326,12 +326,10 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                 <div class="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant/50 space-y-2 text-xs">
                     <p><strong>Assignment:</strong> <span id="grade-asg-title">—</span></p>
                     <div id="grade-sub-file-container" class="hidden">
-                        <p class="text-on-surface-variant mb-1 font-semibold">Submitted File:</p>
-                        <a id="grade-sub-file-btn" href="#" target="_blank" class="px-3 py-1.5 rounded-xl bg-primary text-on-primary font-bold text-xs inline-flex items-center gap-1.5 shadow-xs hover:opacity-90 transition-opacity">
-                            <span class="material-symbols-outlined text-[15px]">download</span>
-                            <span id="grade-sub-file-name">Download File</span>
-                            <span class="text-[10px] font-mono opacity-80" id="grade-sub-file-size"></span>
-                        </a>
+                        <p class="text-on-surface-variant mb-1.5 font-semibold">Submitted Files / Evidence:</p>
+                        <div id="grade-sub-files-list" class="space-y-1.5">
+                            <!-- Populated dynamically with preview and download buttons -->
+                        </div>
                     </div>
                     <div id="grade-sub-link-container">
                         <p><strong>Submitted Link:</strong> <a id="grade-sub-link" href="#" target="_blank" class="text-primary font-bold underline">View Student Work ↗</a></p>
@@ -381,6 +379,8 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
 
             <form id="start-live-form" class="space-y-4" onsubmit="handleStartLiveSubmit(event)">
                 <input type="hidden" id="live-course-code">
+                <input type="hidden" id="live-course-id">
+                <input type="hidden" id="live-course-section">
 
                 <div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/60">
                     <div class="flex items-center justify-between">
@@ -619,6 +619,47 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
     </div>
     </div>
 
+    <!-- ─── MODAL 6: In-Browser Interactive File Preview Modal (No Download Required) ─── -->
+    <div id="file-preview-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in" role="dialog" aria-modal="true">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl w-full max-w-5xl h-[88vh] flex flex-col shadow-2xl overflow-hidden relative">
+            <!-- Header bar -->
+            <div class="px-5 py-3.5 bg-surface-container-low border-b border-outline-variant/60 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[20px]" id="preview-modal-icon">visibility</span>
+                    </div>
+                    <div class="truncate">
+                        <h4 class="text-sm font-bold text-primary truncate" id="preview-modal-title">Document Preview</h4>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-primary-container text-on-primary" id="preview-modal-badge">PDF</span>
+                            <span class="text-[11px] font-mono text-on-surface-variant" id="preview-modal-size"></span>
+                            <span class="text-[11px] text-on-surface-variant/80 hidden sm:inline">· In-browser interactive preview (no forced download)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <a id="preview-modal-open-newtab" href="#" target="_blank" class="px-3 py-1.5 rounded-xl border border-outline-variant hover:bg-surface-container text-xs font-semibold text-on-surface inline-flex items-center gap-1 transition-colors">
+                        <span class="material-symbols-outlined text-[15px]">open_in_new</span> Open Tab
+                    </a>
+                    <a id="preview-modal-download-btn" href="#" download class="px-3 py-1.5 rounded-xl bg-primary text-on-primary hover:opacity-90 text-xs font-bold inline-flex items-center gap-1 transition-opacity shadow-xs">
+                        <span class="material-symbols-outlined text-[15px]">download</span> Download
+                    </a>
+                    <button type="button" onclick="closeFilePreviewModal()" class="p-1.5 rounded-xl hover:bg-surface-container text-on-surface-variant cursor-pointer transition-colors" title="Close Preview">
+                        <span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Viewer Body -->
+            <div id="preview-modal-body" class="flex-1 bg-surface overflow-hidden relative flex items-center justify-center">
+                <!-- Dynamically populated iframe, img, or text viewer -->
+                <div class="flex items-center justify-center p-8 text-on-surface-variant">
+                    <span class="material-symbols-outlined text-[24px] animate-spin mr-2">progress_activity</span> Loading file preview...
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Script Engine -->
     <script>
         var FACULTY_COURSES = [];
@@ -721,6 +762,9 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                                   '</div>' +
                                   '</div>' +
                                   '<div class="flex items-center gap-1 shrink-0">' +
+                                  '<button type="button" onclick="openFilePreviewModal(\'/api/elms.php?action=view_material&id=' + m.id + '&inline=1\', \'' + m.file_name.replace(/'/g, &quot;\\'&quot;) + '\', \'' + m.type + '\', \'' + m.size + '\')" class="p-1.5 rounded-lg border border-primary/30 bg-primary/10 hover:bg-primary hover:text-white text-primary transition-colors inline-flex items-center cursor-pointer" title="View Handout in Browser">' +
+                                  '<span class="material-symbols-outlined text-[15px]">visibility</span>' +
+                                  '</button>' +
                                   '<a href="/api/elms.php?action=download_material&id=' + m.id + '" target="_blank" class="p-1.5 rounded-lg border border-outline-variant bg-surface hover:bg-primary hover:text-white text-primary transition-colors inline-flex items-center" title="Download Handout">' +
                                   '<span class="material-symbols-outlined text-[15px]">download</span>' +
                                   '</a>' +
@@ -753,17 +797,17 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                                   '</div>' +
                                   '<p class="text-[11px] text-on-surface-variant italic truncate mb-2.5">Topic: ' + (c.live_session.topic || 'Live Virtual Class') + '</p>' +
                                   '<div class="flex items-center gap-2">' +
-                                  '<button type="button" onclick="openLiveClassControlPanel(\'' + c.code + '\', \'' + c.title.replace(/'/g, "\\'") + '\', \'' + c.section + '\', ' + JSON.stringify(c.live_session || {}).replace(/"/g, '&quot;') + ')" class="flex-1 py-2 rounded-xl bg-red-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:opacity-90 transition-all shadow-sm cursor-pointer">' +
+                                  '<button type="button" onclick="openLiveClassControlPanel(\'' + c.code + '\', \'' + c.title.replace(/'/g, &quot;\\'&quot;) + '\', \'' + c.section + '\', ' + JSON.stringify(c.live_session || {}).replace(/"/g, '&quot;') + ', \'' + (c.id || '') + '\')" class="flex-1 py-2 rounded-xl bg-red-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:opacity-90 transition-all shadow-sm cursor-pointer">' +
                                   '<span class="material-symbols-outlined text-[16px]">settings_input_component</span> Class Control Panel' +
                                   '</button>' +
-                                  '<button type="button" onclick="toggleLiveClass(\'' + c.code + '\', \'end\')" class="px-3 py-2 rounded-xl border border-red-500/30 text-red-600 dark:text-red-400 bg-surface hover:bg-red-500/10 font-bold text-xs transition-colors cursor-pointer inline-flex items-center gap-1">' +
+                                  '<button type="button" onclick="toggleLiveClass(\'' + c.code + '\', \'end\', \'' + c.section + '\', \'' + (c.id || '') + '\')" class="px-3 py-2 rounded-xl border border-red-500/30 text-red-600 dark:text-red-400 bg-surface hover:bg-red-500/10 font-bold text-xs transition-colors cursor-pointer inline-flex items-center gap-1">' +
                                   '<span class="material-symbols-outlined text-[15px]">stop_circle</span> End' +
                                   '</button>' +
                                   '</div>' +
                                   '</div>';
                 } else {
                     liveBoxHtml = '<div class="mt-4">' +
-                                  '<button type="button" onclick="openStartLiveModal(\'' + c.code + '\', \'' + c.title.replace(/'/g, "\\'") + '\', \'' + c.section + '\')" class="w-full py-2 rounded-xl border border-red-500/40 bg-red-500/5 hover:bg-red-500/15 text-red-600 dark:text-red-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">' +
+                                  '<button type="button" onclick="openStartLiveModal(\'' + c.code + '\', \'' + c.title.replace(/'/g, &quot;\\'&quot;) + '\', \'' + c.section + '\', \'' + (c.id || '') + '\')" class="w-full py-2 rounded-xl border border-red-500/40 bg-red-500/5 hover:bg-red-500/15 text-red-600 dark:text-red-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">' +
                                   '<span class="material-symbols-outlined text-[16px]">video_call</span> 🔴 Start Live Virtual Class (Sec ' + c.section + ')' +
                                   '</button>' +
                                   '</div>';
@@ -812,6 +856,17 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
             document.getElementById('stat-total-assignments').textContent = totalAsgs + ' Tasks';
         }
 
+        var ALL_SUBMISSIONS_BY_ID = {};
+
+        function formatStudentCollegiateName(rawName) {
+            if (!rawName) return 'STUDENT';
+            var clean = rawName.trim().replace(/\s+/g, ' ');
+            var parts = clean.split(' ');
+            if (parts.length <= 1) return parts[0].toUpperCase();
+            var last = parts.pop();
+            return last.toUpperCase() + ', ' + parts.join(' ');
+        }
+
         function renderSubmissionsTable(subs) {
             subs = subs || ALL_SUBMISSIONS || [];
             var tbody = document.getElementById('submissions-table-body');
@@ -819,6 +874,7 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
             badge.textContent = subs.length;
             document.getElementById('stat-total-subs').textContent = subs.length + ' Recorded';
 
+            ALL_SUBMISSIONS_BY_ID = {};
             if (subs.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-on-surface-variant italic">No student coursework submissions recorded yet.</td></tr>';
                 return;
@@ -826,35 +882,69 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
 
             var html = '';
             subs.forEach(function (s) {
+                ALL_SUBMISSIONS_BY_ID[s.id] = s;
+
                 var statusBadge = s.status === 'Graded'
-                    ? '<span class="px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold bg-status-success/15 text-status-success">Graded · ' + s.score + '</span>'
+                    ? '<span class="px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold bg-status-success/15 text-status-success">Graded · ' + (s.score || 'Recorded') + '</span>'
                     : '<span class="px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300">Needs Grading</span>';
 
-                var gradeBtn = '<button type="button" onclick="openGradeModal(\'' + s.id + '\', \'' + s.student_name.replace(/'/g, "\\'") + '\', \'' + s.student_number + '\', \'' + (s.assignment_title || '').replace(/'/g, "\\'") + '\', \'' + (s.submitted_link || '').replace(/'/g, "\\'") + '\', \'' + (s.notes || '').replace(/'/g, "\\'") + '\', \'' + (s.score || '') + '\', \'' + (s.remarks || '').replace(/'/g, "\\'") + '\', \'' + (s.file_name || '').replace(/'/g, "\\'") + '\', \'' + (s.file_size || '') + '\')" class="px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold hover:opacity-90 transition-all shadow-xs cursor-pointer inline-flex items-center gap-1">' +
+                var gradeBtn = '<button type="button" onclick="openGradeModalById(\'' + s.id + '\')" class="px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold hover:opacity-90 transition-all shadow-xs cursor-pointer inline-flex items-center gap-1">' +
                                '<span class="material-symbols-outlined text-[14px]">edit</span> ' + (s.status === 'Graded' ? 'Edit Grade' : 'Grade') +
                                '</button>';
 
+                var displayName = s.formatted_name || formatStudentCollegiateName(s.student_name);
+
+                // Build attached files list (Supports multi-file upload e.g. Proof 1 and Proof 2)
                 var fileOrLinkHtml = '';
-                if (s.file_name) {
-                    fileOrLinkHtml += '<a href="/api/elms.php?action=download_submission&id=' + s.id + '" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs inline-flex items-center gap-1.5 shadow-2xs border border-primary/20" title="Download Student Submission">' +
-                                      '<span class="material-symbols-outlined text-[15px]">download</span>' +
-                                      '<span class="truncate max-w-[130px]">' + s.file_name + '</span>' +
-                                      '<span class="text-[9px] font-mono text-on-surface-variant font-normal">(' + (s.file_size || '') + ')</span>' +
-                                      '</a>';
+                var filesList = (s.files && s.files.length) ? s.files : [];
+                if (!filesList.length && s.file_name) {
+                    filesList = [{
+                        file_name: s.file_name,
+                        file_path: s.file_path,
+                        file_type: s.file_type || 'file',
+                        file_size: s.file_size || ''
+                    }];
                 }
+
+                if (filesList.length > 0) {
+                    fileOrLinkHtml += '<div class="space-y-1.5 max-w-[280px]">';
+                    filesList.forEach(function (f, idx) {
+                        fileOrLinkHtml += '<div class="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-surface border border-outline-variant/60 text-xs shadow-2xs">' +
+                                          '<div class="flex items-center gap-1.5 min-w-0">' +
+                                          '<span class="material-symbols-outlined text-[16px] text-primary shrink-0">description</span>' +
+                                          '<span class="truncate font-semibold text-primary text-[11px]" title="' + f.file_name + '">' + f.file_name + '</span>' +
+                                          '<span class="text-[9px] font-mono text-on-surface-variant shrink-0">(' + (f.file_size || 'file') + ')</span>' +
+                                          '</div>' +
+                                          '<div class="flex items-center gap-1 shrink-0">' +
+                                          '<button type="button" onclick="openFilePreviewModal(\'/api/elms.php?action=view_submission&id=' + s.id + '&file_idx=' + idx + '&inline=1\', \'' + f.file_name.replace(/'/g, &quot;\\'&quot;) + '\', \'' + (f.file_type || '') + '\', \'' + (f.file_size || '') + '\')" class="px-2 py-0.5 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold text-[10px] transition-colors inline-flex items-center gap-0.5 cursor-pointer" title="View inside Browser">' +
+                                          '<span class="material-symbols-outlined text-[13px]">visibility</span> View' +
+                                          '</button>' +
+                                          '<a href="/api/elms.php?action=download_submission&id=' + s.id + '&file_idx=' + idx + '" target="_blank" class="p-1 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors inline-flex items-center" title="Download">' +
+                                          '<span class="material-symbols-outlined text-[13px]">download</span>' +
+                                          '</a>' +
+                                          '</div>' +
+                                          '</div>';
+                    });
+                    fileOrLinkHtml += '</div>';
+                }
+
                 if (s.submitted_link) {
-                    fileOrLinkHtml += (s.file_name ? '<br>' : '') + '<a href="' + s.submitted_link + '" target="_blank" class="text-primary underline font-medium hover:opacity-80 inline-flex items-center gap-1 text-xs mt-1">Open Link <span class="material-symbols-outlined text-[13px]">open_in_new</span></a>';
+                    fileOrLinkHtml += '<div class="mt-1"><a href="' + s.submitted_link + '" target="_blank" class="text-primary underline font-medium hover:opacity-80 inline-flex items-center gap-1 text-[11px]"><span class="material-symbols-outlined text-[13px]">link</span> Proof Link ↗</a></div>';
                 }
-                if (!s.file_name && !s.submitted_link) {
+
+                if (!filesList.length && !s.submitted_link) {
                     fileOrLinkHtml = '<span class="text-on-surface-variant/60 italic text-xs">No attachment</span>';
                 }
 
-                html += '<tr class="hover:bg-surface-container-low transition-colors">' +
-                        '<td class="p-4"><p class="font-bold text-primary">' + s.student_name + '</p><p class="font-mono text-[10px] text-on-surface-variant">' + s.student_number + '</p></td>' +
-                        '<td class="p-4 font-mono font-bold text-primary">' + s.course_code + '</td>' +
+                html += '<tr class="hover:bg-surface-container-low transition-colors border-b border-outline-variant/40">' +
+                        '<td class="p-4">' +
+                        '<p class="font-bold text-primary tracking-wide">' + displayName + '</p>' +
+                        '<p class="font-mono text-[10px] text-on-surface-variant">' + (s.student_number || s.student_email || 'Enrolled Student') + '</p>' +
+                        '</td>' +
+                        '<td class="p-4"><span class="px-2 py-0.5 rounded-lg bg-primary/10 text-primary font-mono text-xs font-bold">' + s.course_code + '</span></td>' +
                         '<td class="p-4 font-semibold text-on-surface">' + (s.assignment_title || 'Course Task') + '</td>' +
                         '<td class="p-4">' + fileOrLinkHtml + '</td>' +
-                        '<td class="p-4 font-mono text-[11px] text-on-surface-variant">' + s.submitted_at + '</td>' +
+                        '<td class="p-4 font-mono text-[11px] text-on-surface-variant">' + (s.submitted_at || 'Just now') + '</td>' +
                         '<td class="p-4">' + statusBadge + '</td>' +
                         '<td class="p-4 text-right">' + gradeBtn + '</td>' +
                         '</tr>';
@@ -895,20 +985,54 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
             document.getElementById('create-asg-modal').classList.remove('flex');
         }
 
-        function openGradeModal(subId, studentName, studentNum, asgTitle, link, notes, currentScore, currentRemarks, fileName, fileSize) {
+        function openGradeModalById(subId) {
+            var s = ALL_SUBMISSIONS_BY_ID[subId];
+            if (!s) return;
+            openGradeModal(s.id, s.formatted_name || s.student_name, s.student_number, s.assignment_title, s.submitted_link, s.notes, s.score, s.remarks, s.files, s);
+        }
+
+        function openGradeModal(subId, studentName, studentNum, asgTitle, link, notes, currentScore, currentRemarks, files, submissionObj) {
             document.getElementById('grade-sub-id').value = subId;
             document.getElementById('grade-student-label').textContent = studentName + ' (' + studentNum + ')';
-            document.getElementById('grade-asg-title').textContent = asgTitle;
+            document.getElementById('grade-asg-title').textContent = asgTitle || 'Coursework Assignment';
             
             var fileContainer = document.getElementById('grade-sub-file-container');
-            var fileBtn = document.getElementById('grade-sub-file-btn');
-            var fileNameEl = document.getElementById('grade-sub-file-name');
-            var fileSizeEl = document.getElementById('grade-sub-file-size');
-            if (fileName && fileName !== 'null' && fileName !== '') {
+            var filesListEl = document.getElementById('grade-sub-files-list');
+
+            var filesToRender = [];
+            if (Array.isArray(files) && files.length > 0) {
+                filesToRender = files;
+            } else if (submissionObj && submissionObj.files && submissionObj.files.length > 0) {
+                filesToRender = submissionObj.files;
+            } else if (submissionObj && submissionObj.file_name) {
+                filesToRender = [{
+                    file_name: submissionObj.file_name,
+                    file_type: submissionObj.file_type || 'file',
+                    file_size: submissionObj.file_size || ''
+                }];
+            }
+
+            if (filesToRender.length > 0 && filesListEl) {
                 fileContainer.classList.remove('hidden');
-                fileBtn.href = '/api/elms.php?action=download_submission&id=' + encodeURIComponent(subId);
-                fileNameEl.textContent = fileName;
-                fileSizeEl.textContent = fileSize ? '(' + fileSize + ')' : '';
+                var fHtml = '';
+                filesToRender.forEach(function(f, idx) {
+                    fHtml += '<div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-surface border border-outline-variant/60">' +
+                             '<div class="flex items-center gap-2 min-w-0">' +
+                             '<span class="material-symbols-outlined text-[17px] text-primary shrink-0">description</span>' +
+                             '<span class="truncate font-semibold text-primary text-xs">' + f.file_name + '</span>' +
+                             '<span class="text-[10px] font-mono text-on-surface-variant shrink-0">(' + (f.file_size || '') + ')</span>' +
+                             '</div>' +
+                             '<div class="flex items-center gap-1.5 shrink-0">' +
+                             '<button type="button" onclick="openFilePreviewModal(\'/api/elms.php?action=view_submission&id=' + subId + '&file_idx=' + idx + '&inline=1\', \'' + f.file_name.replace(/'/g, &quot;\\'&quot;) + '\', \'' + (f.file_type || '') + '\', \'' + (f.file_size || '') + '\')" class="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold text-xs transition-colors inline-flex items-center gap-1 cursor-pointer">' +
+                             '<span class="material-symbols-outlined text-[14px]">visibility</span> View Work' +
+                             '</button>' +
+                             '<a href="/api/elms.php?action=download_submission&id=' + subId + '&file_idx=' + idx + '" target="_blank" class="p-1 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors inline-flex items-center" title="Download">' +
+                             '<span class="material-symbols-outlined text-[14px]">download</span>' +
+                             '</a>' +
+                             '</div>' +
+                             '</div>';
+                });
+                filesListEl.innerHTML = fHtml;
             } else {
                 fileContainer.classList.add('hidden');
             }
@@ -1098,8 +1222,10 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
         var COUNTDOWN_TIMER = null;
         var TEACHER_MEET_WINDOW = null;
 
-        function openStartLiveModal(code, title, section) {
+        function openStartLiveModal(code, title, section, courseId) {
             document.getElementById('live-course-code').value = code;
+            if (document.getElementById('live-course-id')) document.getElementById('live-course-id').value = courseId || '';
+            if (document.getElementById('live-course-section')) document.getElementById('live-course-section').value = section || '2A';
             document.getElementById('live-modal-course-badge').textContent = code;
             document.getElementById('live-modal-section-badge').textContent = 'Section ' + section;
             document.getElementById('live-modal-course-title').textContent = title;
@@ -1132,9 +1258,10 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
         async function handleStartLiveSubmit(e) {
             e.preventDefault();
             var code = document.getElementById('live-course-code').value;
+            var courseId = document.getElementById('live-course-id')?.value || '';
+            var sec = document.getElementById('live-course-section')?.value || document.getElementById('live-section-readonly').value.replace(/^Section\s+/i, '');
             var topic = document.getElementById('live-topic').value.trim();
             var agenda = document.getElementById('live-agenda').value.trim();
-            var sec = document.getElementById('live-section-readonly').value.replace(/^Section\s+/i, '');
             var grace = parseInt(document.getElementById('live-grace-period').value, 10) || 15;
             var btn = document.getElementById('start-live-submit-btn');
 
@@ -1156,7 +1283,9 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        course_id: courseId,
                         course_code: code,
+                        section: sec,
                         state: 'start',
                         topic: topic,
                         agenda: agenda,
@@ -1172,7 +1301,7 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
 
                 closeStartLiveModal();
                 if (window.notify) {
-                    window.notify('PlugNmeet / WebRTC virtual class started for ' + code + '!', 'success');
+                    window.notify('PlugNmeet / WebRTC virtual class started for ' + code + ' (Section ' + sec + ')!', 'success');
                 }
 
                 var roomUrl = '/live_room.php?session_code=' + encodeURIComponent(data.live_session?.session_code || '') + '&course_code=' + encodeURIComponent(code) + '&room_id=' + encodeURIComponent(data.live_session?.room_id || '');
@@ -1185,7 +1314,7 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                 }
 
                 // Open ELMS Class Control Panel
-                openLiveClassControlPanel(code, data.course?.title || topic, data.course?.section || sec, data.live_session);
+                openLiveClassControlPanel(code, data.course?.title || topic, data.course?.section || sec, data.live_session, courseId);
                 loadFacultyElms();
             } catch (err) {
                 if (roomWindow && !roomWindow.closed) roomWindow.close();
@@ -1196,8 +1325,9 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
             }
         }
 
-        function openLiveClassControlPanel(code, title, section, session) {
+        function openLiveClassControlPanel(code, title, section, session, courseId) {
             CURRENT_LIVE_SESSION = session || {};
+            CURRENT_LIVE_SESSION.course_id = courseId || '';
             CURRENT_LIVE_SESSION.course_code = code;
             CURRENT_LIVE_SESSION.course_title = title;
             CURRENT_LIVE_SESSION.section = section;
@@ -1587,11 +1717,11 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                 try { TEACHER_MEET_WINDOW.close(); } catch (e) {}
                 TEACHER_MEET_WINDOW = null;
             }
-            await toggleLiveClass(CURRENT_LIVE_SESSION.course_code, 'end');
+            await toggleLiveClass(CURRENT_LIVE_SESSION.course_code, 'end', CURRENT_LIVE_SESSION.section, CURRENT_LIVE_SESSION.course_id || CURRENT_LIVE_SESSION.id);
             closeClassroomModal();
         }
 
-        async function toggleLiveClass(code, state) {
+        async function toggleLiveClass(code, state, section, courseId) {
             try {
                 if (state === 'end' && TEACHER_MEET_WINDOW && !TEACHER_MEET_WINDOW.closed) {
                     try { TEACHER_MEET_WINDOW.close(); } catch (e) {}
@@ -1601,7 +1731,9 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        course_id: courseId || '',
                         course_code: code,
+                        section: section || '',
                         state: state
                     })
                 });
@@ -1617,6 +1749,97 @@ $PAGE_TITLE = 'LMS Courses & Submissions Hub · NPC LMS Faculty';
             } catch (err) {
                 alert('Error: ' + err.message);
             }
+        }
+
+        // ─── IN-BROWSER INTERACTIVE FILE PREVIEW MODAL ───
+        function openFilePreviewModal(fileUrl, fileName, fileType, fileSize) {
+            fileName = fileName || 'File Document';
+            fileType = (fileType || '').toLowerCase();
+            fileSize = fileSize || '';
+
+            var modal = document.getElementById('file-preview-modal');
+            var titleEl = document.getElementById('preview-modal-title');
+            var badgeEl = document.getElementById('preview-modal-badge');
+            var sizeEl = document.getElementById('preview-modal-size');
+            var iconEl = document.getElementById('preview-modal-icon');
+            var openTabBtn = document.getElementById('preview-modal-open-newtab');
+            var dlBtn = document.getElementById('preview-modal-download-btn');
+            var bodyEl = document.getElementById('preview-modal-body');
+
+            titleEl.textContent = fileName;
+            sizeEl.textContent = fileSize ? '(' + fileSize + ')' : '';
+            openTabBtn.href = fileUrl;
+
+            var dlUrl = fileUrl.replace(/([?&])(inline|view)=[^&]*/g, '');
+            if (dlUrl.indexOf('?') === -1) dlUrl += '?download=1';
+            else dlUrl += '&download=1';
+            dlBtn.href = dlUrl;
+            dlBtn.setAttribute('download', fileName);
+
+            var ext = fileName.split('.').pop().toLowerCase();
+            badgeEl.textContent = (ext || fileType || 'FILE').toUpperCase();
+
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
+                iconEl.textContent = 'image';
+            } else if (ext === 'pdf') {
+                iconEl.textContent = 'picture_as_pdf';
+            } else if (['txt', 'sql', 'json', 'csv', 'js', 'py', 'php', 'html', 'css'].includes(ext)) {
+                iconEl.textContent = 'code';
+            } else {
+                iconEl.textContent = 'description';
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
+                bodyEl.innerHTML = '<div class="w-full h-full p-4 sm:p-8 flex items-center justify-center bg-slate-950/20 overflow-auto">' +
+                                   '<img src="' + fileUrl + '" alt="' + fileName.replace(/"/g, '&quot;') + '" class="max-h-full max-w-full rounded-xl object-contain shadow-md border border-outline-variant/30">' +
+                                   '</div>';
+            } else if (ext === 'pdf') {
+                bodyEl.innerHTML = '<iframe src="' + fileUrl + '#toolbar=1&navpanes=0" class="w-full h-full border-0 bg-surface"></iframe>';
+            } else if (['txt', 'sql', 'json', 'csv', 'js', 'py', 'php', 'html', 'css'].includes(ext)) {
+                bodyEl.innerHTML = '<div class="w-full h-full p-6 overflow-auto bg-surface-container-lowest font-mono text-xs text-on-surface flex items-center justify-center">' +
+                                   '<span class="material-symbols-outlined text-[20px] animate-spin mr-2">progress_activity</span> Reading file contents...' +
+                                   '</div>';
+                fetch(fileUrl)
+                    .then(function(r) { return r.text(); })
+                    .then(function(txt) {
+                        var safeTxt = txt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        bodyEl.innerHTML = '<div class="w-full h-full p-6 overflow-auto bg-surface-container-lowest">' +
+                                           '<pre class="font-mono text-xs text-on-surface leading-relaxed whitespace-pre-wrap select-text">' + safeTxt + '</pre>' +
+                                           '</div>';
+                    })
+                    .catch(function(err) {
+                        bodyEl.innerHTML = '<div class="p-8 text-center text-error">Failed to load text preview: ' + err.message + '</div>';
+                    });
+            } else {
+                var fullFileUrl = window.location.origin + fileUrl;
+                bodyEl.innerHTML = '<div class="w-full h-full flex flex-col items-center justify-center p-8 text-center space-y-4">' +
+                                   '<div class="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">' +
+                                   '<span class="material-symbols-outlined text-[36px]">file_present</span>' +
+                                   '</div>' +
+                                   '<div>' +
+                                   '<h4 class="text-base font-bold text-primary">' + fileName + '</h4>' +
+                                   '<p class="text-xs text-on-surface-variant max-w-md mx-auto mt-1">This document format (' + ext.toUpperCase() + ') can be inspected via Google Docs Online Viewer or downloaded directly.</p>' +
+                                   '</div>' +
+                                   '<div class="flex flex-wrap items-center justify-center gap-3 pt-2">' +
+                                   '<a href="https://docs.google.com/viewer?url=' + encodeURIComponent(fullFileUrl) + '&embedded=true" target="_blank" class="px-4 py-2 rounded-xl bg-primary text-on-primary hover:opacity-90 text-xs font-bold inline-flex items-center gap-1.5 shadow-sm">' +
+                                   '<span class="material-symbols-outlined text-[16px]">visibility</span> Open Google Docs Viewer' +
+                                   '</a>' +
+                                   '<a href="' + dlUrl + '" download target="_blank" class="px-4 py-2 rounded-xl border border-outline-variant hover:bg-surface-container text-xs font-semibold text-on-surface inline-flex items-center gap-1.5">' +
+                                   '<span class="material-symbols-outlined text-[16px]">download</span> Direct Download (' + (fileSize || 'File') + ')' +
+                                   '</a>' +
+                                   '</div>' +
+                                   '</div>';
+            }
+        }
+
+        function closeFilePreviewModal() {
+            var modal = document.getElementById('file-preview-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.getElementById('preview-modal-body').innerHTML = '';
         }
 
         document.addEventListener('DOMContentLoaded', function() {

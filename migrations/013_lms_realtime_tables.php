@@ -73,6 +73,7 @@ $db->exec("CREATE TABLE IF NOT EXISTS lms_submissions (
     file_size VARCHAR(32) NULL,
     submitted_link TEXT NULL,
     notes TEXT NULL,
+    attachments_json LONGTEXT NULL,
     submitted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(32) NOT NULL DEFAULT 'Submitted',
     score VARCHAR(32) NULL,
