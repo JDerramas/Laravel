@@ -98,7 +98,7 @@ function isSessionValid(): bool {
     // ─── Real-Time Database State Verification ─────────────────────────────────
     try {
         $db = getDB();
-        $uStmt = $db->prepare("SELECT id, email, full_name, role, program, section, is_active, status, student_number FROM users WHERE id = ? OR LOWER(email) = ? LIMIT 1");
+        $uStmt = $db->prepare("SELECT id, email, full_name, role, program, section, is_active, status, student_number, avatar_url FROM users WHERE id = ? OR LOWER(email) = ? LIMIT 1");
         $uStmt->execute([$_SESSION['user_id'], strtolower($_SESSION['email'] ?? '')]);
         $liveUser = $uStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -142,7 +142,7 @@ function isSessionValid(): bool {
         $newSec = $liveUser['section'] ?? '';
 
         if ($newRole === 'student') {
-            $stdStmt = $db->prepare("SELECT program, section, student_number, scholar_status FROM students WHERE user_id = ? OR LOWER(email) = ? LIMIT 1");
+            $stdStmt = $db->prepare("SELECT program, section, student_number, scholar_status, avatar_url FROM students WHERE user_id = ? OR LOWER(email) = ? LIMIT 1");
             $stdStmt->execute([$liveUser['id'], strtolower($liveUser['email'])]);
             $stdRow = $stdStmt->fetch(PDO::FETCH_ASSOC);
             if ($stdRow) {
@@ -150,6 +150,9 @@ function isSessionValid(): bool {
                 if (!empty($stdRow['section'])) $newSec = $stdRow['section'];
                 if (!empty($stdRow['student_number'])) $_SESSION['student_number'] = $stdRow['student_number'];
                 if (!empty($stdRow['scholar_status'])) $_SESSION['scholar_status'] = $stdRow['scholar_status'];
+                if (!empty($stdRow['avatar_url']) && empty($liveUser['avatar_url'])) {
+                    $liveUser['avatar_url'] = $stdRow['avatar_url'];
+                }
             }
         }
 

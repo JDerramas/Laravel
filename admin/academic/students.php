@@ -502,13 +502,14 @@ if (empty($programsList)) {
 
     <script>
         const csrfToken = <?= json_encode($csrf_token) ?>;
+        const API_ADMIN = window.location.pathname.includes('/admin/') ? window.location.pathname.split('/admin/')[0] + '/api/admin.php' : '/api/admin.php';
         let allStudents = [];
         let parsedExcelStudents = [];
 
         async function loadStudents() {
             const tbody = document.getElementById('students-list');
             try {
-                const res = await fetch('/api/admin.php?action=list_users&role=student');
+                const res = await fetch(API_ADMIN + '?action=list_users&role=student');
                 const data = await res.json();
                 if (!data.success) throw new Error(data.message || 'Failed to load');
                 allStudents = data.users || [];
@@ -748,7 +749,7 @@ if (empty($programsList)) {
             btn.innerHTML = '<span class="material-symbols-outlined text-[15px] animate-spin">progress_activity</span> Saving…';
 
             try {
-                const res = await fetch('/api/admin.php?action=update_student', {
+                const res = await fetch(API_ADMIN + '?action=update_student', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
                     body: JSON.stringify({
@@ -783,7 +784,7 @@ if (empty($programsList)) {
                 confirmText: 'Yes, Delete Permanently'
             })) return;
             try {
-                const res = await fetch('/api/admin.php?action=delete_user', {
+                const res = await fetch(API_ADMIN + '?action=delete_user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
                     body: JSON.stringify({ id: id })
@@ -857,7 +858,7 @@ if (empty($programsList)) {
             btn.innerHTML = '<span class="material-symbols-outlined text-[15px] animate-spin">progress_activity</span> Adding…';
 
             try {
-                const res = await fetch('/api/admin.php?action=create_student', {
+                const res = await fetch(API_ADMIN + '?action=create_student', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
                     body: JSON.stringify({
@@ -1059,7 +1060,7 @@ if (empty($programsList)) {
             document.getElementById('process-import-btn').disabled = true;
 
             try {
-                const res = await fetch('/api/admin.php?action=bulk_import_students', {
+                const res = await fetch(API_ADMIN + '?action=bulk_import_students', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
                     body: JSON.stringify({

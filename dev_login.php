@@ -118,13 +118,21 @@ if ($role === 'admin') {
     $_SESSION['active_portal'] = 'faculty';
     $_SESSION['student_number'] = 'FAC-001';
 } else {
-    $_SESSION['user_id'] = '872b0d96-9f14-41fd-b4c0-af848788ca8b';
+    $db = getDB();
+    $st = $db->query("SELECT * FROM users WHERE email = 'jderramas251505@navotaspolytechniccollege.edu.ph' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+    $stdAvatar = !empty($st['avatar_url']) ? $st['avatar_url'] : 'https://lh3.googleusercontent.com/a/ACg8ocKrNc0kwVZis0tWU6KfvQ7NdV6n4tDeZ3aMab1DSGJZj3JKiDs=s96-c';
+    $stdName = !empty($st['full_name']) ? formatLastNameFirst($st['full_name']) : 'DERRAMAS, JILO';
+
+    $_SESSION['user_id'] = $st['id'] ?? 'usr-stu-ca32f0e0f8';
     $_SESSION['email'] = 'jderramas251505@navotaspolytechniccollege.edu.ph';
-    $_SESSION['name'] = 'Jilo Derramas';
+    $_SESSION['name'] = $stdName;
+    $_SESSION['raw_name'] = $st['full_name'] ?? 'JILO DERRAMAS';
+    $_SESSION['picture'] = $stdAvatar;
+    $_SESSION['avatar'] = $stdAvatar;
     $_SESSION['role'] = 'student';
     $_SESSION['base_role'] = 'student';
     $_SESSION['active_portal'] = 'student';
-    $_SESSION['student_number'] = '251505';
+    $_SESSION['student_number'] = $st['student_number'] ?? '251505';
     $_SESSION['scholar_status'] = 'Scholar';
     $_SESSION['section'] = '2A';
     $_SESSION['program'] = 'AIS';

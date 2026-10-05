@@ -892,22 +892,31 @@ if ($method === 'POST' && $action === 'set_user_role') {
         exit;
     }
 
-    $uQuery = supabaseServiceQuery("/rest/v1/users?id=eq." . rawurlencode($id) . "&select=id,email,role&limit=1");
-    $user = ($uQuery['status'] === 200 && !empty($uQuery['data'])) ? $uQuery['data'][0] : null;
+    $db = getDB();
+    $uStmt = $db->prepare("SELECT id, email, role FROM users WHERE id = ? OR LOWER(email) = ? LIMIT 1");
+    $uStmt->execute([$id, strtolower($id)]);
+    $user = $uStmt->fetch(PDO::FETCH_ASSOC);
+
     if (!$user) {
         http_response_code(404);
         echo json_encode(['success' => false, 'message' => 'User not found.']);
         exit;
     }
 
-    $res = supabaseServiceQuery("/rest/v1/users?id=eq." . rawurlencode($id), 'PATCH', ['role' => $newRole]);
-    if ($res['status'] < 200 || $res['status'] >= 300) {
-        echo json_encode(['success' => false, 'message' => 'Database rejected the role change.']);
+    try {
+        $db->prepare("UPDATE users SET role = ? WHERE id = ?")->execute([$newRole, $user['id']]);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Database error updating role.']);
         exit;
     }
 
+    try {
+        supabaseServiceQuery("/rest/v1/users?id=eq." . rawurlencode($user['id']), 'PATCH', ['role' => $newRole]);
+    } catch (\Throwable $e) {}
+
     // Check if the current logged-in user changed their own role
-    $isSelf = (strcasecmp($user['email'] ?? '', $currentUserEmail) === 0 || ($_SESSION['user_id'] ?? '') === $id);
+    $isSelf = (strcasecmp($user['email'] ?? '', $currentUserEmail) === 0 || ($_SESSION['user_id'] ?? '') === $user['id']);
     $redirectUrl = null;
     if ($isSelf) {
         $_SESSION['role'] = $newRole;
@@ -938,8 +947,11 @@ if ($method === 'POST' && $action === 'set_user_status') {
         exit;
     }
 
-    $uQuery = supabaseServiceQuery("/rest/v1/users?id=eq." . rawurlencode($id) . "&select=id,email&limit=1");
-    $user = ($uQuery['status'] === 200 && !empty($uQuery['data'])) ? $uQuery['data'][0] : null;
+    $db = getDB();
+    $uStmt = $db->prepare("SELECT id, email, status, is_active FROM users WHERE id = ? OR LOWER(email) = ? LIMIT 1");
+    $uStmt->execute([$id, strtolower($id)]);
+    $user = $uStmt->fetch(PDO::FETCH_ASSOC);
+
     if (!$user) {
         http_response_code(404);
         echo json_encode(['success' => false, 'message' => 'User not found.']);
@@ -947,16 +959,20 @@ if ($method === 'POST' && $action === 'set_user_status') {
     }
 
     $isActive = ($status === 'Active') ? 1 : 0;
-    $res = supabaseServiceQuery("/rest/v1/users?id=eq." . rawurlencode($id), 'PATCH', [
-        'status' => $status,
-        'is_active' => $isActive
-    ]);
-
-    if ($res['status'] < 200 || $res['status'] >= 300) {
-        http_response_code(502);
-        echo json_encode(['success' => false, 'message' => 'Database rejected status update.']);
+    try {
+        $db->prepare("UPDATE users SET status = ?, is_active = ? WHERE id = ?")->execute([$status, $isActive, $user['id']]);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Database error updating status.']);
         exit;
     }
+
+    try {
+        supabaseServiceQuery("/rest/v1/users?id=eq." . rawurlencode($user['id']), 'PATCH', [
+            'status' => $status,
+            'is_active' => $isActive
+        ]);
+    } catch (\Throwable $e) {}
 
     logSecurityEvent("USER_STATUS_CHANGED: {$user['email']} set to '$status' by $currentUserEmail", $currentUserEmail, 'High');
     echo json_encode(['success' => true, 'message' => "Status for {$user['email']} set to $status."]);
@@ -975,30 +991,86 @@ if ($method === 'POST' && $action === 'delete_user') {
         exit;
     }
 
-    $uQuery = supabaseServiceQuery("/rest/v1/users?id=eq." . rawurlencode($id) . "&select=id,email&limit=1");
-    $user = ($uQuery['status'] === 200 && !empty($uQuery['data'])) ? $uQuery['data'][0] : null;
-    if (!$user) {
-        http_response_code(404);
-        echo json_encode(['success' => false, 'message' => 'User not found.']);
-        exit;
-    }
+    $db = getDB();
+    $user = null;
 
-    if (strcasecmp($user['email'] ?? '', $currentUserEmail) === 0 || ($_SESSION['user_id'] ?? '') === $id) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'You cannot delete your own active account.']);
-        exit;
-    }
-
-    // Delete from users table
-    $del = supabaseServiceQuery("/rest/v1/users?id=eq." . rawurlencode($id), 'DELETE');
+    // 1. Search MySQL users table by id or email
     try {
-        $db = getDB();
-        $st = $db->prepare("DELETE FROM students WHERE user_id = ? OR LOWER(email) = ?");
-        $st->execute([$id, strtolower($user['email'])]);
+        $uStmt = $db->prepare("SELECT id, email, full_name, role FROM users WHERE id = ? OR LOWER(email) = ? LIMIT 1");
+        $uStmt->execute([$id, strtolower($id)]);
+        $user = $uStmt->fetch(PDO::FETCH_ASSOC);
     } catch (\Throwable $e) {}
 
-    logSecurityEvent("USER_DELETED: {$user['email']} permanently deleted by $currentUserEmail", $currentUserEmail, 'High');
-    echo json_encode(['success' => true, 'message' => "Account for {$user['email']} was permanently deleted."]);
+    // 2. If not found in users, check students table by id, user_id, or email
+    if (!$user) {
+        try {
+            $sStmt = $db->prepare("SELECT id, user_id, email, full_name FROM students WHERE id = ? OR user_id = ? OR LOWER(email) = ? LIMIT 1");
+            $sStmt->execute([$id, $id, strtolower($id)]);
+            $sRow = $sStmt->fetch(PDO::FETCH_ASSOC);
+            if ($sRow) {
+                if (!empty($sRow['user_id'])) {
+                    $uStmt = $db->prepare("SELECT id, email, full_name, role FROM users WHERE id = ? LIMIT 1");
+                    $uStmt->execute([$sRow['user_id']]);
+                    $user = $uStmt->fetch(PDO::FETCH_ASSOC);
+                }
+                if (!$user) {
+                    $user = [
+                        'id' => $sRow['user_id'] ?: ('student-' . $sRow['id']),
+                        'email' => $sRow['email'],
+                        'full_name' => $sRow['full_name'],
+                        'role' => 'student'
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {}
+    }
+
+    if (!$user) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'User account not found.']);
+        exit;
+    }
+
+    if (strcasecmp($user['email'] ?? '', $currentUserEmail) === 0 || ($_SESSION['user_id'] ?? '') === $user['id']) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'You cannot delete your own active administrator account.']);
+        exit;
+    }
+
+    $userEmail = strtolower($user['email']);
+    $userId = $user['id'];
+
+    // Delete from users table
+    try {
+        $db->prepare("DELETE FROM users WHERE id = ? OR LOWER(email) = ?")->execute([$userId, $userEmail]);
+    } catch (\Throwable $e) {
+        error_log("[delete_user Error] Failed to delete from users: " . $e->getMessage());
+    }
+
+    // Delete from students table
+    try {
+        $db->prepare("DELETE FROM students WHERE user_id = ? OR id = ? OR LOWER(email) = ?")->execute([$userId, $id, $userEmail]);
+    } catch (\Throwable $e) {}
+
+    // Cascade delete attendance, grades, and enrollments
+    try {
+        $db->prepare("DELETE FROM attendance WHERE student_id = ? OR LOWER(student_email) = ?")->execute([$userId, $userEmail]);
+    } catch (\Throwable $e) {}
+    try {
+        $db->prepare("DELETE FROM grades WHERE student_id = ? OR LOWER(student_email) = ?")->execute([$userId, $userEmail]);
+    } catch (\Throwable $e) {}
+    try {
+        $db->prepare("DELETE FROM enrollments WHERE student_id = ? OR LOWER(student_email) = ?")->execute([$userId, $userEmail]);
+    } catch (\Throwable $e) {}
+
+    // Best-effort deletion in Supabase driver if configured
+    try {
+        supabaseServiceQuery("/rest/v1/users?id=eq." . rawurlencode($userId), 'DELETE');
+        supabaseServiceQuery("/rest/v1/students?user_id=eq." . rawurlencode($userId), 'DELETE');
+    } catch (\Throwable $e) {}
+
+    logSecurityEvent("USER_DELETED: $userEmail permanently deleted by $currentUserEmail", $currentUserEmail, 'High');
+    echo json_encode(['success' => true, 'message' => "Account for $userEmail was permanently deleted."]);
     exit;
 }
 
@@ -1021,12 +1093,16 @@ if ($method === 'POST' && $action === 'set_user_active') {
     }
 
     $statusVal = $active ? 'Active' : 'Restricted';
-    $res = supabaseServiceQuery("/rest/v1/users?email=eq." . rawurlencode($email), 'PATCH', ['is_active' => $active ? 1 : 0, 'status' => $statusVal]);
-    if ($res['status'] < 200 || $res['status'] >= 300) {
-        http_response_code(502);
-        echo json_encode(['success' => false, 'message' => 'Database rejected the update.']);
-        exit;
+    $db = getDB();
+    try {
+        $db->prepare("UPDATE users SET is_active = ?, status = ? WHERE LOWER(email) = ?")->execute([$active ? 1 : 0, $statusVal, $email]);
+    } catch (\Throwable $e) {
+        error_log("[set_user_active Error] " . $e->getMessage());
     }
+
+    try {
+        supabaseServiceQuery("/rest/v1/users?email=eq." . rawurlencode($email), 'PATCH', ['is_active' => $active ? 1 : 0, 'status' => $statusVal]);
+    } catch (\Throwable $e) {}
 
     logSecurityEvent("USER_" . ($active ? 'ACTIVATED' : 'DEACTIVATED') . ": $email by " . ($_SESSION['email'] ?? 'admin'), $_SESSION['email'] ?? '', 'High');
     echo json_encode(['success' => true, 'message' => $active ? 'Account reactivated.' : 'Account deactivated. Login is now blocked.']);

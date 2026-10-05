@@ -384,6 +384,7 @@ if (empty($programsList)) {
     <script>
         const CSRF = <?= json_encode($csrf_token) ?>;
         const MY_EMAIL = <?= json_encode(strtolower($admin_email)) ?>;
+        const API_ADMIN = window.location.pathname.includes('/admin/') ? window.location.pathname.split('/admin/')[0] + '/api/admin.php' : '/api/admin.php';
 
         /* ── State ─────────────────────────────────────────── */
         let USERS = [];
@@ -406,7 +407,7 @@ if (empty($programsList)) {
         async function loadUsers() {
             const tbody = document.getElementById('users-tbody');
             try {
-                const res = await fetch('/api/admin.php?action=list_users', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const res = await fetch(API_ADMIN + '?action=list_users', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 const data = await res.json();
                 if (!data.success) throw new Error(data.message || 'Failed to load accounts.');
                 USERS = data.users || [];
@@ -621,7 +622,7 @@ if (empty($programsList)) {
                 return;
             }
             try {
-                const res = await fetch('/api/admin.php?action=set_user_role', {
+                const res = await fetch(API_ADMIN + '?action=set_user_role', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF },
                     body: JSON.stringify({ id, role: newRole })
@@ -661,7 +662,7 @@ if (empty($programsList)) {
                 return;
             }
             try {
-                const res = await fetch('/api/admin.php?action=set_user_status', {
+                const res = await fetch(API_ADMIN + '?action=set_user_status', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF },
                     body: JSON.stringify({ id, status: newStatus })
@@ -692,7 +693,7 @@ if (empty($programsList)) {
             })) return;
 
             try {
-                const res = await fetch('/api/admin.php?action=delete_user', {
+                const res = await fetch(API_ADMIN + '?action=delete_user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF },
                     body: JSON.stringify({ id })
@@ -803,7 +804,7 @@ if (empty($programsList)) {
             btn.innerHTML = '<span class="material-symbols-outlined text-[17px] animate-spin">progress_activity</span> Creating…';
 
             try {
-                const res = await fetch('/api/admin.php?action=create_user', {
+                const res = await fetch(API_ADMIN + '?action=create_user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF },
                     body: JSON.stringify(payload)
@@ -896,7 +897,7 @@ if (empty($programsList)) {
             for (let i = 0; i < pendingRows.length; i++) {
                 const r = pendingRows[i];
                 try {
-                    const res = await fetch('/api/admin.php?action=create_user', {
+                    const res = await fetch(API_ADMIN + '?action=create_user', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF },
                         body: JSON.stringify({ ...r, csrf_token: CSRF })

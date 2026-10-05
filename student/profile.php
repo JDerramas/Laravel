@@ -6,6 +6,34 @@ $userId = $_SESSION['user_id'] ?? '';
 $sessionEmail = strtolower(trim($_SESSION['email'] ?? ''));
 $db = getDB();
 
+// Handle avatar photo upload if submitted
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_avatar'])) {
+    requireCsrf();
+    $file = $_FILES['profile_avatar'];
+    if ($file['error'] === UPLOAD_ERR_OK && $file['size'] > 0 && $file['size'] <= 5 * 1024 * 1024) {
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+
+        if (in_array($mime, $allowedTypes)) {
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+            if (!in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp', 'gif'])) $ext = 'jpg';
+            $filename = 'avatar_' . md5($sessionEmail . time()) . '.' . $ext;
+            $destPath = __DIR__ . '/../uploads/avatars/' . $filename;
+            if (move_uploaded_file($file['tmp_name'], $destPath)) {
+                $avatarWebPath = '/uploads/avatars/' . $filename;
+                $db->prepare("UPDATE users SET avatar_url = ? WHERE LOWER(email) = ? OR id = ?")->execute([$avatarWebPath, $sessionEmail, $userId]);
+                $db->prepare("UPDATE students SET avatar_url = ? WHERE LOWER(email) = ? OR user_id = ?")->execute([$avatarWebPath, $sessionEmail, $userId]);
+                $_SESSION['picture'] = $avatarWebPath;
+                $_SESSION['avatar'] = $avatarWebPath;
+                header("Location: profile.php?msg=avatar_updated");
+                exit();
+            }
+        }
+    }
+}
+
 // Fetch fresh student and user records
 $studentData = null;
 try {
@@ -41,7 +69,8 @@ if (!$studentData) {
     } catch (\Throwable $e) {}
 }
 
-$fullName = $studentData['full_name'] ?? $_SESSION['name'] ?? 'NPC Student';
+$rawFullName = $studentData['full_name'] ?? $_SESSION['raw_name'] ?? $_SESSION['name'] ?? 'NPC Student';
+$fullName = formatLastNameFirst($rawFullName);
 $email = $studentData['email'] ?? $sessionEmail;
 $studentNumber = $studentData['student_number'] ?? $_SESSION['student_number'] ?? '2024-00192';
 $programCode = strtoupper($studentData['program'] ?? $_SESSION['program'] ?? 'AIS');
@@ -49,9 +78,12 @@ $section = $studentData['section'] ?? $_SESSION['section'] ?? '2A';
 $yearLevel = $studentData['year_level'] ?? 2;
 $status = $studentData['status'] ?? 'Enrolled';
 
-// Avatar priority: Google OAuth picture in session -> DB avatar_url -> null
-$avatarUrl = $_SESSION['picture'] ?? $_SESSION['avatar'] ?? $studentData['avatar_url'] ?? $studentData['u_avatar'] ?? null;
-$initial = strtoupper(substr($fullName, 0, 1));
+// Avatar priority: DB students.avatar_url -> users.avatar_url -> session picture
+$avatarUrl = !empty($studentData['avatar_url']) ? $studentData['avatar_url'] 
+    : (!empty($studentData['u_avatar']) ? $studentData['u_avatar'] 
+    : (!empty($_SESSION['picture']) ? $_SESSION['picture'] 
+    : (!empty($_SESSION['avatar']) ? $_SESSION['avatar'] : null)));
+$initial = strtoupper(substr($rawFullName, 0, 1));
 
 // Program dictionary
 $programsDict = [
@@ -193,9 +225,18 @@ $user_name = explode(' ', trim($raw_name))[0];
                                     </div>
                                 <?php endif; ?>
                             </div>
+                            <!-- Photo Upload Trigger -->
+                            <label for="avatar-file-input" class="absolute bottom-0 left-0 w-8 h-8 rounded-full bg-slate-900/90 hover:bg-slate-900 text-amber-300 border border-amber-400/40 shadow-lg flex items-center justify-center cursor-pointer transition-transform hover:scale-110" title="Upload Custom Profile Photo">
+                                <span class="material-symbols-outlined text-[16px]">photo_camera</span>
+                            </label>
+                            <form id="avatar-upload-form" method="POST" enctype="multipart/form-data" class="hidden">
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(getCsrfToken()) ?>">
+                                <input type="file" id="avatar-file-input" name="profile_avatar" accept="image/*" onchange="document.getElementById('avatar-upload-form').submit();">
+                            </form>
+
                             <!-- Google Sync indicator -->
-                            <div class="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center" title="Synced with Google Account">
-                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5">
+                            <div class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center" title="Synced with Google Account">
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-4 h-4">
                             </div>
                         </div>
 
