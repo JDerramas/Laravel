@@ -435,111 +435,82 @@ $jsConfig = getJsConfig();
                             <p class="text-xs text-emerald-100/75 mt-1">Instant database authentication · No third-party redirect</p>
                         </div>
 
-                        <!-- Live User Identity Card (Auto-detects from Gmail / DB) -->
-                        <div id="live-user-badge" class="flex items-center gap-3.5 p-3 rounded-2xl bg-white/10 border border-emerald-400/30 backdrop-blur-md mb-4 transition-all duration-300">
-                            <div class="relative w-12 h-12 shrink-0">
-                                <img id="live-user-avatar" src="/assets/img/npc-logo.png" alt="Avatar" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-400/60 shadow-md bg-white p-0.5 transition-all duration-300">
-                                <span id="live-user-status-dot" class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#012415]"></span>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center gap-1.5">
-                                    <h3 id="live-user-name" class="text-sm font-bold text-white truncate">NPC Academic Account</h3>
-                                    <span id="live-user-verified" class="hidden material-symbols-outlined text-amber-300 text-[16px]">verified</span>
+                        <!-- Primary Student 1-Click Access: DERRAMAS, JILO -->
+                        <div class="mb-5">
+                            <a href="dev_login.php?email=jderramas251505@navotaspolytechniccollege.edu.ph"
+                                class="ripple btn-shine press group relative flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-600/40 via-emerald-500/30 to-teal-600/30 hover:from-emerald-500/50 hover:to-teal-500/40 border-2 border-emerald-400/60 hover:border-emerald-300 shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer block">
+                                <div class="relative w-14 h-14 shrink-0">
+                                    <img src="https://lh3.googleusercontent.com/a/ACg8ocKrNc0kwVZis0tWU6KfvQ7NdV6n4tDeZ3aMab1DSGJZj3JKiDs=s96-c"
+                                         alt="DERRAMAS, JILO" class="w-14 h-14 rounded-full object-cover border-2 border-amber-300 shadow-md group-hover:scale-105 transition-transform">
+                                    <span class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#012415]"></span>
                                 </div>
-                                <p id="live-user-subtitle" class="text-[11px] text-emerald-200/80 font-mono truncate">Enter your email or student number</p>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-1.5 mb-1">
+                                        <span class="text-[10px] font-mono font-bold text-amber-300 uppercase tracking-wider bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/30">Student Portal</span>
+                                        <span class="material-symbols-outlined text-amber-300 text-[14px]">verified</span>
+                                    </div>
+                                    <h3 class="text-base font-extrabold text-white truncate group-hover:text-amber-200 transition-colors">
+                                        DERRAMAS, JILO
+                                    </h3>
+                                    <p class="text-xs text-emerald-200/90 font-mono">AIS 2A · ID: 251505</p>
+                                </div>
+                                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-500/30 group-hover:bg-emerald-400 group-hover:text-emerald-950 text-white transition-all shadow-md shrink-0">
+                                    <span class="material-symbols-outlined text-[22px]">arrow_forward</span>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Quick Role Access (Exactly 2: Faculty and Admin) -->
+                        <div class="pt-4 border-t border-white/10">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-[10px] font-mono uppercase tracking-wider text-emerald-300 font-bold flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[13px] text-amber-300">flash_on</span> Quick Portal Switch
+                                </span>
+                                <span class="text-[9px] text-white/50 font-mono">1-Click Access</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <!-- 1. Faculty (Moreno) -->
+                                <a href="dev_login.php?email=edsan.moreno@navotaspolytechniccollege.edu.ph"
+                                   class="flex items-center gap-2.5 p-3 rounded-xl bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-400/40 transition-all group text-left cursor-pointer">
+                                    <div class="w-9 h-9 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-200 font-bold text-xs shrink-0 group-hover:scale-105 transition-transform">
+                                        EM
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-xs font-bold text-white truncate group-hover:text-amber-200 transition-colors">MORENO, Edsan</p>
+                                        <p class="text-[10px] text-amber-300/80 font-mono truncate">Faculty · CCS</p>
+                                    </div>
+                                </a>
+
+                                <!-- 2. Administrator -->
+                                <a href="dev_login.php?email=jiloderramas@gmail.com"
+                                   class="flex items-center gap-2.5 p-3 rounded-xl bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-400/40 transition-all group text-left cursor-pointer">
+                                    <img src="https://lh3.googleusercontent.com/a/ACg8ocIxJ4LcSkHu8zIWqYnSFrecxLcgsvm1JT1RqrgVzcMIHrICI-UI=s96-c"
+                                         alt="Admin" class="w-9 h-9 rounded-full object-cover border border-purple-400/50 shrink-0 group-hover:scale-105 transition-transform">
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-xs font-bold text-white truncate group-hover:text-purple-200 transition-colors">DERRAMAS, JILO</p>
+                                        <p class="text-[10px] text-purple-300/80 font-mono truncate">Administrator</p>
+                                    </div>
+                                </a>
                             </div>
                         </div>
 
-                        <!-- Login Form -->
-                        <form method="POST" action="login.php" class="flex flex-col gap-3.5" id="login-form">
-                            <?php if (!empty($loginError)): ?>
-                                <div class="text-xs font-semibold text-rose-200 bg-rose-950/70 border border-rose-500/40 rounded-xl px-3 py-2.5 flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-[16px] text-rose-400">error</span>
-                                    <span><?= htmlspecialchars($loginError) ?></span>
-                                </div>
-                            <?php endif; ?>
-
-                            <div>
-                                <label for="identifier" class="block text-xs font-medium text-emerald-100/90 mb-1">NPC Email, Registered Gmail, or Student ID</label>
-                                <div class="relative">
-                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-emerald-300/60 text-[18px]">account_circle</span>
-                                    <input type="text" id="identifier" name="identifier" required placeholder="e.g. jiloderramas@gmail.com or 251505"
-                                        class="w-full bg-black/35 border border-emerald-500/30 focus:border-emerald-400 focus:bg-black/50 focus:ring-1 focus:ring-emerald-400 text-white placeholder-emerald-100/40 text-xs rounded-xl pl-9 pr-10 py-3 transition-all outline-none"
-                                        autocomplete="username" autofocus>
-                                    <span id="lookup-spinner" class="hidden material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400 text-[18px] animate-spin">progress_activity</span>
-                                </div>
-                            </div>  
-
-                            <div id="password-group">
-                                <div class="flex items-center justify-between mb-1">
-                                    <label for="password" class="block text-xs font-medium text-emerald-100/90">Password</label>
-                                    <span class="text-[10px] text-emerald-300/90 font-mono font-bold flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[13px] text-amber-300">verified</span> Optional · Instant Auto-Login
-                                    </span>
-                                </div>
-                                <div class="relative">
-                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-emerald-300/60 text-[18px]">lock</span>
-                                    <input type="password" id="password" name="password" placeholder="Leave blank for instant database sign-in"
-                                        class="w-full bg-black/35 border border-emerald-500/30 focus:border-emerald-400 focus:bg-black/50 focus:ring-1 focus:ring-emerald-400 text-white placeholder-emerald-100/40 text-xs rounded-xl pl-9 pr-3 py-3 transition-all outline-none"
-                                        autocomplete="current-password">
-                                </div>
-                            </div>
-
-                            <button type="submit" id="submit-login-btn"
-                                class="ripple btn-shine press w-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-1">
-                                <span class="material-symbols-outlined text-[18px]">bolt</span>
-                                <span id="submit-btn-text">Sign In to NPC Portal</span>
+                        <!-- Optional: Collapsible Other Student ID -->
+                        <div class="mt-4 pt-3 border-t border-white/5 text-center">
+                            <button type="button" onclick="document.getElementById('manual-login-panel').classList.toggle('hidden')"
+                                class="text-[11px] text-emerald-300/70 hover:text-emerald-200 font-mono transition-colors inline-flex items-center gap-1 cursor-pointer">
+                                <span class="material-symbols-outlined text-[13px]">swap_horiz</span>
+                                Sign in with another Student ID
                             </button>
-                        </form>
 
-                        <!-- Quick 1-Click Access (Convenient Direct Switcher) -->
-                        <div class="pt-4 border-t border-white/10 mt-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-[10px] font-mono uppercase tracking-wider text-emerald-300 font-bold flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[13px] text-amber-300">flash_on</span> 1-Click Quick Access
-                                </span>
-                                <span class="text-[9px] text-white/50 font-mono">Verified Local Accounts</span>
-                            </div>
-
-                            <div class="flex flex-col gap-2">
-                                <!-- Jilo Derramas (Student) -->
-                                <button type="button" onclick="selectQuickAccount('jderramas251505@navotaspolytechniccollege.edu.ph')" class="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 hover:bg-emerald-500/20 border border-white/10 hover:border-emerald-400/40 transition-all text-left w-full cursor-pointer group">
-                                    <img src="https://lh3.googleusercontent.com/a/ACg8ocKrNc0kwVZis0tWU6KfvQ7NdV6n4tDeZ3aMab1DSGJZj3JKiDs=s96-c" alt="Jilo" class="w-8 h-8 rounded-full object-cover border border-emerald-400/50 group-hover:scale-105 transition-transform shrink-0">
-                                    <div class="min-w-0 flex-1">
-                                        <div class="flex items-center justify-between">
-                                            <p class="text-xs font-bold text-white truncate">DERRAMAS, JILO</p>
-                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-200 font-mono">Student</span>
-                                        </div>
-                                        <p class="text-[10px] text-emerald-300/80 font-mono truncate">AIS 2A · 251505</p>
-                                    </div>
-                                    <span class="material-symbols-outlined text-white/40 group-hover:text-emerald-300 text-[18px]">arrow_forward</span>
-                                </button>
-
-                                <!-- Jilo Derramas (Admin) -->
-                                <button type="button" onclick="selectQuickAccount('jiloderramas@gmail.com')" class="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-400/40 transition-all text-left w-full cursor-pointer group">
-                                    <img src="https://lh3.googleusercontent.com/a/ACg8ocIxJ4LcSkHu8zIWqYnSFrecxLcgsvm1JT1RqrgVzcMIHrICI-UI=s96-c" alt="Jilo Admin" class="w-8 h-8 rounded-full object-cover border border-purple-400/50 group-hover:scale-105 transition-transform shrink-0">
-                                    <div class="min-w-0 flex-1">
-                                        <div class="flex items-center justify-between">
-                                            <p class="text-xs font-bold text-white truncate">DERRAMAS, JILO</p>
-                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/30 text-purple-200 font-mono">Admin</span>
-                                        </div>
-                                        <p class="text-[10px] text-purple-300/80 font-mono truncate">jiloderramas@gmail.com</p>
-                                    </div>
-                                    <span class="material-symbols-outlined text-white/40 group-hover:text-purple-300 text-[18px]">arrow_forward</span>
-                                </button>
-
-                                <!-- Faculty (Moreno) -->
-                                <button type="button" onclick="selectQuickAccount('edsan.moreno@navotaspolytechniccollege.edu.ph')" class="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-400/40 transition-all text-left w-full cursor-pointer group">
-                                    <div class="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-200 font-bold text-xs shrink-0">EM</div>
-                                    <div class="min-w-0 flex-1">
-                                        <div class="flex items-center justify-between">
-                                            <p class="text-xs font-bold text-white truncate">MORENO, Edsan</p>
-                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-200 font-mono">Faculty</span>
-                                        </div>
-                                        <p class="text-[10px] text-amber-300/80 font-mono truncate">College of Computer Studies</p>
-                                    </div>
-                                    <span class="material-symbols-outlined text-white/40 group-hover:text-amber-300 text-[18px]">arrow_forward</span>
-                                </button>
+                            <div id="manual-login-panel" class="hidden mt-3 text-left">
+                                <form method="POST" action="login.php" class="flex gap-2">
+                                    <input type="text" name="identifier" placeholder="Enter Student ID or Email" required
+                                        class="flex-1 bg-black/35 border border-emerald-500/30 focus:border-emerald-400 text-white placeholder-emerald-100/40 text-xs rounded-xl px-3 py-2 outline-none">
+                                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl transition-all cursor-pointer">
+                                        Go
+                                    </button>
+                                </form>
                             </div>
                         </div>
 
@@ -556,84 +527,6 @@ $jsConfig = getJsConfig();
 
     <!-- Live Profile & Client Script (No external Supabase dependency) -->
     <script>
-        const identInput = document.getElementById('identifier');
-        const liveAvatar = document.getElementById('live-user-avatar');
-        const liveName = document.getElementById('live-user-name');
-        const liveSubtitle = document.getElementById('live-user-subtitle');
-        const liveVerified = document.getElementById('live-user-verified');
-        const liveBadge = document.getElementById('live-user-badge');
-        const submitText = document.getElementById('submit-btn-text');
-        const spinner = document.getElementById('lookup-spinner');
-
-        let lookupTimer = null;
-        const defaultAvatar = '/assets/img/npc-logo.png';
-        const defaultName = 'NPC Academic Account';
-        const defaultSubtitle = 'Enter your email or student number';
-
-        function updateLiveBadge(found, data) {
-            if (found && data) {
-                liveAvatar.src = data.avatar || defaultAvatar;
-                liveAvatar.classList.remove('bg-white', 'p-0.5');
-                liveName.textContent = data.name;
-                liveSubtitle.textContent = data.subtitle || data.role_label;
-                liveVerified.classList.remove('hidden');
-                liveBadge.classList.add('border-emerald-400', 'bg-emerald-950/60', 'ring-1', 'ring-emerald-400/40');
-                if (submitText) submitText.textContent = 'Continue as ' + data.name;
-            } else {
-                liveAvatar.src = defaultAvatar;
-                liveAvatar.classList.add('bg-white', 'p-0.5');
-                liveName.textContent = defaultName;
-                liveSubtitle.textContent = defaultSubtitle;
-                liveVerified.classList.add('hidden');
-                liveBadge.classList.remove('border-emerald-400', 'bg-emerald-950/60', 'ring-1', 'ring-emerald-400/40');
-                if (submitText) submitText.textContent = 'Sign In to NPC Portal';
-            }
-        }
-
-        async function performLookup(val) {
-            val = (val || '').trim();
-            if (val.length < 2) {
-                updateLiveBadge(false);
-                return;
-            }
-            if (spinner) spinner.classList.remove('hidden');
-            try {
-                const res = await fetch('login.php?action=lookup&q=' + encodeURIComponent(val));
-                const data = await res.json();
-                if (data && data.found) {
-                    updateLiveBadge(true, data);
-                } else {
-                    updateLiveBadge(false);
-                }
-            } catch (e) {
-                console.warn('Lookup error:', e);
-            } finally {
-                if (spinner) spinner.classList.add('hidden');
-            }
-        }
-
-        if (identInput) {
-            identInput.addEventListener('input', () => {
-                clearTimeout(lookupTimer);
-                lookupTimer = setTimeout(() => {
-                    performLookup(identInput.value);
-                }, 220);
-            });
-
-            if (identInput.value) {
-                performLookup(identInput.value);
-            }
-        }
-
-        function selectQuickAccount(id) {
-            if (identInput) {
-                identInput.value = id;
-                performLookup(id);
-                const form = document.getElementById('login-form');
-                if (form) form.submit();
-            }
-        }
-
         // Initialize Cinematic 3D Login Hero Scene
         document.addEventListener('DOMContentLoaded', function() {
             if (window.npcThree && typeof window.npcThree.initLoginHero === 'function') {
