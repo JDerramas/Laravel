@@ -56,9 +56,11 @@ if (!empty($emailParam)) {
             $uRole = $targetUser['role'] ?? 'student';
             if ($uRole === 'faculty') $uRole = 'teacher';
 
+            $formattedName = formatLastNameFirst($targetUser['full_name']);
             $_SESSION['user_id'] = $targetUser['id'];
             $_SESSION['email'] = $targetUser['email'];
-            $_SESSION['name'] = $targetUser['full_name'];
+            $_SESSION['name'] = $formattedName;
+            $_SESSION['raw_name'] = $targetUser['full_name'];
             $_SESSION['picture'] = $targetUser['avatar_url'] ?? null;
             $_SESSION['avatar'] = $targetUser['avatar_url'] ?? null;
             $_SESSION['role'] = $uRole;

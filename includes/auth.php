@@ -156,6 +156,16 @@ function isSessionValid(): bool {
         if (!empty($newProg)) $_SESSION['program'] = $newProg;
         if (!empty($newSec))  $_SESSION['section'] = $newSec;
 
+        // Real-Time Name (Last Name First) & Avatar Sync from MySQL
+        if (!empty($liveUser['full_name'])) {
+            $_SESSION['name'] = formatLastNameFirst($liveUser['full_name']);
+            $_SESSION['raw_name'] = $liveUser['full_name'];
+        }
+        if (!empty($liveUser['avatar_url'])) {
+            $_SESSION['picture'] = $liveUser['avatar_url'];
+            $_SESSION['avatar'] = $liveUser['avatar_url'];
+        }
+
     } catch (\Throwable $e) {
         // Fallback: If database is momentarily unreachable during maintenance, preserve active session
     }
@@ -417,5 +427,57 @@ function resolveSmartFullName(string $email, string $existingName = '', string $
     }
 
     return ($role === 'teacher') ? 'Faculty Member' : (($role === 'admin') ? 'Administrator' : 'Student');
+}
+
+if (!function_exists('formatLastNameFirst')) {
+    /**
+     * Formats any full name into the official Philippine academic standard: LASTNAME, Firstname
+     * E.g. "JILO DERRAMAS" -> "DERRAMAS, JILO"
+     *      "Crisanta Catipay" -> "CATIPAY, Crisanta"
+     *      "Juan dela Cruz" -> "DELA CRUZ, Juan"
+     */
+    function formatLastNameFirst(?string $fullName): string {
+        $fullName = trim($fullName ?? '');
+        if (empty($fullName)) return 'NPC User';
+
+        // If it already contains a comma, normalize case on last name
+        if (strpos($fullName, ',') !== false) {
+            $parts = explode(',', $fullName, 2);
+            return strtoupper(trim($parts[0])) . ', ' . trim($parts[1]);
+        }
+
+        // Clean honorifics if faculty/admin
+        $cleaned = preg_replace('/^(prof\.|dr\.|engr\.|instructor|mr\.|ms\.|mrs\.)\s+/i', '', $fullName);
+        $tokens = preg_split('/\s+/', trim($cleaned));
+
+        if (count($tokens) <= 1) {
+            return strtoupper($tokens[0]);
+        }
+
+        $suffixes = ['jr', 'jr.', 'sr', 'sr.', 'ii', 'iii', 'iv', 'v'];
+        $suffix = '';
+        $lastToken = end($tokens);
+        if (in_array(strtolower($lastToken), $suffixes) && count($tokens) > 2) {
+            $suffix = ' ' . array_pop($tokens);
+        }
+
+        $cnt = count($tokens);
+        $lastLower = strtolower($tokens[$cnt - 1]);
+        $prevLower = $cnt >= 2 ? strtolower($tokens[$cnt - 2]) : '';
+        $prev2Lower = $cnt >= 3 ? strtolower($tokens[$cnt - 3]) : '';
+
+        if ($cnt >= 3 && in_array($prevLower, ['dela', 'del', 'san'])) {
+            $lastName = $tokens[$cnt - 2] . ' ' . $tokens[$cnt - 1] . $suffix;
+            $firstName = implode(' ', array_slice($tokens, 0, $cnt - 2));
+        } elseif ($cnt >= 4 && $prev2Lower === 'de' && in_array($prevLower, ['la', 'los'])) {
+            $lastName = $tokens[$cnt - 3] . ' ' . $tokens[$cnt - 2] . ' ' . $tokens[$cnt - 1] . $suffix;
+            $firstName = implode(' ', array_slice($tokens, 0, $cnt - 3));
+        } else {
+            $lastName = array_pop($tokens) . $suffix;
+            $firstName = implode(' ', $tokens);
+        }
+
+        return strtoupper($lastName) . ', ' . $firstName;
+    }
 }
 ?>
