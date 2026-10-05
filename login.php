@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/supabase_helper.php';
+require_once __DIR__ . '/includes/db_helper.php';
 
 $loginError = '';
 if (isset($_GET['error'])) {

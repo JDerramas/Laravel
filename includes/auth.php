@@ -21,7 +21,7 @@
  *   4. Clean JSON API Error Handling: Gracefully emits HTTP 401/403 JSON envelopes for REST requests.
  */
 
-require_once __DIR__ . '/supabase_helper.php';
+require_once __DIR__ . '/db_helper.php';
 
 // ─── 1. Hardened Session Initialization ────────────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {

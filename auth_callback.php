@@ -13,7 +13,7 @@
  *  - Theme-aware (dark mode / light mode seamless sync)
  *  - Interactive Three.js 3D particle vortex & holographic security ring
  */
-require_once __DIR__ . '/includes/supabase_helper.php';
+require_once __DIR__ . '/includes/db_helper.php';
 $jsConfig = getJsConfig();
 ?>
 <!DOCTYPE html>
@@ -279,7 +279,7 @@ $jsConfig = getJsConfig();
     <script>
         const supabaseUrl = <?= json_encode($jsConfig['url']) ?>;
         const supabaseKey = <?= json_encode($jsConfig['key']) ?>;
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = (typeof supabase !== 'undefined' && supabase.createClient) ? supabase.createClient(supabaseUrl, supabaseKey) : null;
 
         const statusTitle   = document.getElementById('status-title');
         const statusMsg     = document.getElementById('status-msg');

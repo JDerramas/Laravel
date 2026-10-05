@@ -6,7 +6,7 @@
  * Allows switching between Student, Teacher, and Admin accounts for rapid local testing.
  */
 require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/supabase_helper.php';
+require_once __DIR__ . '/includes/db_helper.php';
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '';
 $host = $_SERVER['HTTP_HOST'] ?? '';

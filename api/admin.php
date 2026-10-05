@@ -12,7 +12,7 @@
  */
 
 require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/supabase_helper.php';
+require_once __DIR__ . '/../includes/db_helper.php';
 require_once __DIR__ . '/../includes/ai_moderation.php';
 
 require_admin();
@@ -838,18 +838,8 @@ if ($method === 'POST' && $action === 'create_user') {
         $row['program'] = $program !== '' ? $program : 'Faculty';
     }
 
-    // Optional: send Supabase Auth invite so the account exists for SSO
-    $inviteNote = '';
-    if ($sendInvite) {
-        $inv = supabaseServiceQuery('/auth/v1/admin/generate_link', 'POST', [
-            'type'          => 'signup',
-            'email'         => $email,
-            'options'       => ['redirect_to' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://') . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/auth_callback.php']
-        ]);
-        if ($inv['status'] >= 200 && $inv['status'] < 300) {
-            $inviteNote = ' Invite email sent.';
-        }
-    }
+    // Account created for direct Google Single Sign-On / Institutional Login
+    $inviteNote = ' Account ready for institutional login.';
 
     $res = supabaseServiceQuery("/rest/v1/users", 'POST', [ $row ]);
     if ($res['status'] < 200 || $res['status'] >= 300) {
