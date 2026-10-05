@@ -1,1 +1,466 @@
-{}
+{
+    "2026-01-01": [
+        {
+            "id": "hol-2026-01-01",
+            "title": "New Year's Day (Bagong Taon)",
+            "type": "holiday",
+            "desc": "Regular Holiday — Nationwide celebration welcoming the New Year."
+        }
+    ],
+    "2026-01-02": [
+        {
+            "id": "hol-2026-01-02",
+            "title": "Special Non-Working Day (Post-New Year)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday across the Philippines."
+        }
+    ],
+    "2026-01-16": [
+        {
+            "id": "hol-2026-01-16",
+            "title": "Navotas City Day (Founding Anniversary)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday in the City of Navotas."
+        }
+    ],
+    "2026-02-17": [
+        {
+            "id": "hol-2026-02-17",
+            "title": "Chinese New Year (Spring Festival)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday — Welcoming the Year of the Horse."
+        }
+    ],
+    "2026-02-25": [
+        {
+            "id": "hol-2026-02-25",
+            "title": "EDSA People Power Revolution Anniversary",
+            "type": "holiday",
+            "desc": "Special Non-Working Day commemorating the 1986 EDSA Revolution."
+        }
+    ],
+    "2026-03-20": [
+        {
+            "id": "hol-2026-03-20",
+            "title": "Eid al-Fitr (End of Ramadan)",
+            "type": "holiday",
+            "desc": "Regular Holiday in observance of the Islamic Feast of Breaking the Fast."
+        }
+    ],
+    "2026-04-02": [
+        {
+            "id": "hol-2026-04-02",
+            "title": "Maundy Thursday (Huwebes Santo)",
+            "type": "holiday",
+            "desc": "Regular Holiday — Holy Week observance."
+        }
+    ],
+    "2026-04-03": [
+        {
+            "id": "hol-2026-04-03",
+            "title": "Good Friday (Biyernes Santo)",
+            "type": "holiday",
+            "desc": "Regular Holiday — Holy Week observance."
+        }
+    ],
+    "2026-04-04": [
+        {
+            "id": "hol-2026-04-04",
+            "title": "Black Saturday (Sabado de Gloria)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday — Holy Week observance."
+        }
+    ],
+    "2026-04-09": [
+        {
+            "id": "hol-2026-04-09",
+            "title": "Araw ng Kagitingan (Day of Valor)",
+            "type": "holiday",
+            "desc": "Regular Holiday honoring the heroism of Filipino and Allied soldiers."
+        }
+    ],
+    "2026-05-01": [
+        {
+            "id": "hol-2026-05-01",
+            "title": "Labor Day (Araw ng Manggagawa)",
+            "type": "holiday",
+            "desc": "Regular Holiday honoring the Filipino workforce."
+        }
+    ],
+    "2026-05-27": [
+        {
+            "id": "hol-2026-05-27",
+            "title": "Eid al-Adha (Feast of Sacrifice)",
+            "type": "holiday",
+            "desc": "Regular Holiday celebrating the willingness of Ibrahim to sacrifice his son."
+        }
+    ],
+    "2026-06-12": [
+        {
+            "id": "hol-2026-06-12",
+            "title": "Philippine Independence Day (Araw ng Kasarinlan)",
+            "type": "holiday",
+            "desc": "Regular Holiday commemorating the Declaration of Philippine Independence in 1898."
+        }
+    ],
+    "2026-08-17": [
+        {
+            "id": "acad-2026-08-17",
+            "title": "Opening of Classes (1st Semester AY 2026–2027)",
+            "type": "academic",
+            "desc": "Official start of instruction across all collegiate programs."
+        }
+    ],
+    "2026-08-21": [
+        {
+            "id": "hol-2026-08-21",
+            "title": "Ninoy Aquino Day",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday commemorating the martyrdom of Senator Benigno Aquino Jr."
+        }
+    ],
+    "2026-08-31": [
+        {
+            "id": "hol-2026-08-31",
+            "title": "National Heroes Day (Araw ng mga Bayani)",
+            "type": "holiday",
+            "desc": "Regular Holiday honoring all known and unknown Philippine heroes."
+        }
+    ],
+    "2026-10-05": [
+        {
+            "id": "acad-2026-10-05",
+            "title": "World Teachers' Day",
+            "type": "academic",
+            "desc": "Institutional celebration honoring NPC faculty members and educators."
+        }
+    ],
+    "2026-10-12": [
+        {
+            "id": "exam-2026-10-12",
+            "title": "Midterm Examination Week Begins",
+            "type": "exam",
+            "desc": "Start of the 1st Semester Midterm Assessment Period."
+        }
+    ],
+    "2026-10-16": [
+        {
+            "id": "exam-2026-10-16",
+            "title": "Midterm Examination Week Ends",
+            "type": "exam",
+            "desc": "Conclusion of Midterm Assessments; submission of midterm scores."
+        }
+    ],
+    "2026-10-31": [
+        {
+            "id": "hol-2026-10-31",
+            "title": "Special Non-Working Day (Undas Eve)",
+            "type": "holiday",
+            "desc": "Special Non-Working Day in preparation for All Saints' Day."
+        }
+    ],
+    "2026-11-01": [
+        {
+            "id": "hol-2026-11-01",
+            "title": "All Saints' Day (Undas)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday remembering holy men and women."
+        }
+    ],
+    "2026-11-02": [
+        {
+            "id": "hol-2026-11-02",
+            "title": "All Souls' Day",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday remembering departed loved ones."
+        }
+    ],
+    "2026-11-30": [
+        {
+            "id": "hol-2026-11-30",
+            "title": "Bonifacio Day",
+            "type": "holiday",
+            "desc": "Regular Holiday celebrating the birth anniversary of Gat Andres Bonifacio."
+        }
+    ],
+    "2026-12-08": [
+        {
+            "id": "hol-2026-12-08",
+            "title": "Feast of the Immaculate Conception",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday honoring Mary, patroness of the Philippines."
+        }
+    ],
+    "2026-12-14": [
+        {
+            "id": "exam-2026-12-14",
+            "title": "Final Examination Week (1st Semester)",
+            "type": "exam",
+            "desc": "Administration of departmental final examinations."
+        }
+    ],
+    "2026-12-18": [
+        {
+            "id": "exam-2026-12-18",
+            "title": "End of 1st Semester / Grade Encoding Deadline",
+            "type": "deadline",
+            "desc": "Last day of 1st Semester academic activities and grade submissions."
+        }
+    ],
+    "2026-12-19": [
+        {
+            "id": "acad-2026-12-19",
+            "title": "Start of Christmas / Semestral Break",
+            "type": "academic",
+            "desc": "Semestral break for all college students and academic staff."
+        }
+    ],
+    "2026-12-24": [
+        {
+            "id": "hol-2026-12-24",
+            "title": "Christmas Eve (Bisperas ng Pasko)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday in preparation for Christmas Day."
+        }
+    ],
+    "2026-12-25": [
+        {
+            "id": "hol-2026-12-25",
+            "title": "Christmas Day (Araw ng Pasko)",
+            "type": "holiday",
+            "desc": "Regular Holiday celebrating the birth of Jesus Christ."
+        }
+    ],
+    "2026-12-30": [
+        {
+            "id": "hol-2026-12-30",
+            "title": "Rizal Day (Araw ng Kabayanihan ni Dr. Jose Rizal)",
+            "type": "holiday",
+            "desc": "Regular Holiday commemorating the martyrdom of Dr. Jose Rizal."
+        }
+    ],
+    "2026-12-31": [
+        {
+            "id": "hol-2026-12-31",
+            "title": "New Year's Eve (Bisperas ng Bagong Taon)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday — Last Day of the Year."
+        }
+    ],
+    "2027-01-01": [
+        {
+            "id": "hol-2027-01-01",
+            "title": "New Year's Day (Bagong Taon)",
+            "type": "holiday",
+            "desc": "Regular Holiday welcoming the Year 2027."
+        }
+    ],
+    "2027-01-02": [
+        {
+            "id": "hol-2027-01-02",
+            "title": "Special Non-Working Day",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday across the Philippines."
+        }
+    ],
+    "2027-01-11": [
+        {
+            "id": "acad-2027-01-11",
+            "title": "Opening of Classes (2nd Semester AY 2026–2027)",
+            "type": "academic",
+            "desc": "Official start of 2nd Semester lectures and laboratory sessions."
+        }
+    ],
+    "2027-01-16": [
+        {
+            "id": "hol-2027-01-16",
+            "title": "Navotas City Day (Founding Anniversary)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday in the City of Navotas."
+        }
+    ],
+    "2027-02-06": [
+        {
+            "id": "hol-2027-02-06",
+            "title": "Chinese New Year (Spring Festival)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday — Welcoming the Year of the Goat."
+        }
+    ],
+    "2027-02-25": [
+        {
+            "id": "hol-2027-02-25",
+            "title": "EDSA People Power Revolution Anniversary",
+            "type": "holiday",
+            "desc": "Special Non-Working Day."
+        }
+    ],
+    "2027-03-09": [
+        {
+            "id": "hol-2027-03-09",
+            "title": "Eid al-Fitr (End of Ramadan)",
+            "type": "holiday",
+            "desc": "Regular Holiday celebrating Eid al-Fitr."
+        }
+    ],
+    "2027-03-15": [
+        {
+            "id": "exam-2027-03-15",
+            "title": "2nd Semester Midterm Exam Week",
+            "type": "exam",
+            "desc": "Midterm examinations across all collegiate year levels."
+        }
+    ],
+    "2027-03-25": [
+        {
+            "id": "hol-2027-03-25",
+            "title": "Maundy Thursday (Huwebes Santo)",
+            "type": "holiday",
+            "desc": "Regular Holiday — Holy Week observance."
+        }
+    ],
+    "2027-03-26": [
+        {
+            "id": "hol-2027-03-26",
+            "title": "Good Friday (Biyernes Santo)",
+            "type": "holiday",
+            "desc": "Regular Holiday — Holy Week observance."
+        }
+    ],
+    "2027-03-27": [
+        {
+            "id": "hol-2027-03-27",
+            "title": "Black Saturday (Sabado de Gloria)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday — Holy Week observance."
+        }
+    ],
+    "2027-04-09": [
+        {
+            "id": "hol-2027-04-09",
+            "title": "Araw ng Kagitingan (Day of Valor)",
+            "type": "holiday",
+            "desc": "Regular Holiday honoring Filipino veterans."
+        }
+    ],
+    "2027-05-01": [
+        {
+            "id": "hol-2027-05-01",
+            "title": "Labor Day (Araw ng Manggagawa)",
+            "type": "holiday",
+            "desc": "Regular Holiday honoring all Filipino workers."
+        }
+    ],
+    "2027-05-16": [
+        {
+            "id": "hol-2027-05-16",
+            "title": "Eid al-Adha (Feast of Sacrifice)",
+            "type": "holiday",
+            "desc": "Regular Holiday."
+        }
+    ],
+    "2027-05-17": [
+        {
+            "id": "exam-2027-05-17",
+            "title": "2nd Semester Final Examination Week",
+            "type": "exam",
+            "desc": "Final comprehensive assessments for graduating & non-graduating students."
+        }
+    ],
+    "2027-06-04": [
+        {
+            "id": "acad-2027-06-04",
+            "title": "Commencement Exercises & Graduation Day",
+            "type": "academic",
+            "desc": "Annual graduation ceremony for the Class of 2027."
+        }
+    ],
+    "2027-06-12": [
+        {
+            "id": "hol-2027-06-12",
+            "title": "Philippine Independence Day (Araw ng Kasarinlan)",
+            "type": "holiday",
+            "desc": "Regular Holiday celebrating Philippine Independence."
+        }
+    ],
+    "2027-08-21": [
+        {
+            "id": "hol-2027-08-21",
+            "title": "Ninoy Aquino Day",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday."
+        }
+    ],
+    "2027-08-30": [
+        {
+            "id": "hol-2027-08-30",
+            "title": "National Heroes Day (Araw ng mga Bayani)",
+            "type": "holiday",
+            "desc": "Regular Holiday."
+        }
+    ],
+    "2027-11-01": [
+        {
+            "id": "hol-2027-11-01",
+            "title": "All Saints' Day (Undas)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday."
+        }
+    ],
+    "2027-11-02": [
+        {
+            "id": "hol-2027-11-02",
+            "title": "All Souls' Day",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday."
+        }
+    ],
+    "2027-11-30": [
+        {
+            "id": "hol-2027-11-30",
+            "title": "Bonifacio Day",
+            "type": "holiday",
+            "desc": "Regular Holiday celebrating Gat Andres Bonifacio."
+        }
+    ],
+    "2027-12-08": [
+        {
+            "id": "hol-2027-12-08",
+            "title": "Feast of the Immaculate Conception",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday."
+        }
+    ],
+    "2027-12-24": [
+        {
+            "id": "hol-2027-12-24",
+            "title": "Christmas Eve",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday."
+        }
+    ],
+    "2027-12-25": [
+        {
+            "id": "hol-2027-12-25",
+            "title": "Christmas Day (Araw ng Pasko)",
+            "type": "holiday",
+            "desc": "Regular Holiday."
+        }
+    ],
+    "2027-12-30": [
+        {
+            "id": "hol-2027-12-30",
+            "title": "Rizal Day",
+            "type": "holiday",
+            "desc": "Regular Holiday."
+        }
+    ],
+    "2027-12-31": [
+        {
+            "id": "hol-2027-12-31",
+            "title": "New Year's Eve (Bisperas ng Bagong Taon)",
+            "type": "holiday",
+            "desc": "Special Non-Working Holiday."
+        }
+    ]
+}
