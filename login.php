@@ -273,8 +273,7 @@ $jsConfig = getJsConfig();
     </script>
     <script src="/assets/js/npc-three.js?v=<?= file_exists(__DIR__ . '/assets/js/npc-three.js') ? filemtime(__DIR__ . '/assets/js/npc-three.js') : '1' ?>"></script>
     <script src="/assets/js/npc.js?v=<?= file_exists(__DIR__ . '/assets/js/npc.js') ? filemtime(__DIR__ . '/assets/js/npc.js') : '1' ?>"></script>
-    <!-- Supabase JS Client & Google Identity Services SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Google Identity Services SDK -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
@@ -426,92 +425,85 @@ $jsConfig = getJsConfig();
                             <p class="text-xs text-amber-300 font-medium">Navotas Polytechnic College</p>
                         </div>
 
-                        <div class="mb-5">
+                        <div class="mb-6 text-center">
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-[0.18em] glass-chip text-white/90 border border-emerald-500/30">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot"></span>
-                                Local MySQL Database Protected
+                                Official Institutional Access
                             </span>
-                            <h2 class="text-2xl font-bold text-white mt-2.5">Sign In to Portal</h2>
-                            <p class="text-xs text-emerald-100/75 mt-1">Instant database authentication · No third-party redirect</p>
+                            <h2 class="text-2xl font-bold text-white mt-3">Welcome to NPC LMS</h2>
+                            <p class="text-xs text-emerald-100/75 mt-1">Sign in with your Official Google Account</p>
                         </div>
 
-                        <!-- Primary Student 1-Click Access: DERRAMAS, JILO -->
-                        <div class="mb-5">
-                            <a href="dev_login.php?email=jderramas251505@navotaspolytechniccollege.edu.ph"
-                                class="ripple btn-shine press group relative flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-600/40 via-emerald-500/30 to-teal-600/30 hover:from-emerald-500/50 hover:to-teal-500/40 border-2 border-emerald-400/60 hover:border-emerald-300 shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer block">
-                                <div class="relative w-14 h-14 shrink-0">
-                                    <img src="https://lh3.googleusercontent.com/a/ACg8ocKrNc0kwVZis0tWU6KfvQ7NdV6n4tDeZ3aMab1DSGJZj3JKiDs=s96-c"
-                                         alt="DERRAMAS, JILO" class="w-14 h-14 rounded-full object-cover border-2 border-amber-300 shadow-md group-hover:scale-105 transition-transform">
-                                    <span class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#012415]"></span>
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-1.5 mb-1">
-                                        <span class="text-[10px] font-mono font-bold text-amber-300 uppercase tracking-wider bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/30">Student Portal</span>
-                                        <span class="material-symbols-outlined text-amber-300 text-[14px]">verified</span>
-                                    </div>
-                                    <h3 class="text-base font-extrabold text-white truncate group-hover:text-amber-200 transition-colors">
-                                        DERRAMAS, JILO
-                                    </h3>
-                                    <p class="text-xs text-emerald-200/90 font-mono">AIS 2A · ID: 251505</p>
-                                </div>
-                                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-500/30 group-hover:bg-emerald-400 group-hover:text-emerald-950 text-white transition-all shadow-md shrink-0">
-                                    <span class="material-symbols-outlined text-[22px]">arrow_forward</span>
-                                </div>
-                            </a>
+                        <?php if (!empty($loginError)): ?>
+                            <div class="text-xs font-semibold text-rose-200 bg-rose-950/70 border border-rose-500/40 rounded-xl px-3.5 py-3 flex items-center gap-2 mb-4">
+                                <span class="material-symbols-outlined text-[18px] text-rose-400 shrink-0">error</span>
+                                <span><?= htmlspecialchars($loginError) ?></span>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Client Status Alert -->
+                        <div id="auth-alert" class="hidden text-xs font-semibold rounded-xl px-3.5 py-3 items-center gap-2 mb-4"></div>
+
+                        <!-- Direct Google Sign-In Action (Pure Google Identity Services - No Supabase) -->
+                        <div class="flex flex-col items-center gap-3">
+                            <div id="google-gsi-anchor" class="w-full flex justify-center"></div>
+
+                            <button type="button" id="google-login-btn" onclick="triggerGoogleSignIn()"
+                                class="ripple btn-shine press w-full font-semibold py-3.5 px-4 rounded-2xl transition-all flex items-center justify-center gap-3 cursor-pointer group shadow-xl hover:shadow-2xl hover:scale-[1.01]"
+                                style="background-color: #ffffff !important; color: #1e293b; border: 2px solid #e2e8f0;">
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" class="w-5 h-5 shrink-0">
+                                <span class="text-sm font-bold text-slate-800">Sign In with Google</span>
+                                <span class="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-emerald-700 transition-colors">arrow_forward</span>
+                            </button>
+
+                            <p class="text-[11px] text-center text-emerald-100/75 flex items-center justify-center gap-1.5 mt-1">
+                                <span class="material-symbols-outlined text-[13px] text-amber-300">verified</span>
+                                NPC Institutional Email or Registered Gmail
+                            </p>
                         </div>
 
-                        <!-- Quick Role Access (Exactly 2: Faculty and Admin) -->
-                        <div class="pt-4 border-t border-white/10">
-                            <div class="flex items-center justify-between mb-3">
+                        <!-- Quick 1-Click Access (Faculty & Admin Only) -->
+                        <div class="pt-5 border-t border-white/10 mt-6">
+                            <div class="flex items-center justify-between mb-2.5">
                                 <span class="text-[10px] font-mono uppercase tracking-wider text-emerald-300 font-bold flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[13px] text-amber-300">flash_on</span> Quick Portal Switch
+                                    <span class="material-symbols-outlined text-[13px] text-amber-300">flash_on</span> 1-Click Quick Access
                                 </span>
-                                <span class="text-[9px] text-white/50 font-mono">1-Click Access</span>
+                                <span class="text-[9px] text-white/50 font-mono">Development & Testing</span>
                             </div>
 
                             <div class="grid grid-cols-2 gap-2.5">
-                                <!-- 1. Faculty (Moreno) -->
-                                <a href="dev_login.php?email=edsan.moreno@navotaspolytechniccollege.edu.ph"
-                                   class="flex items-center gap-2.5 p-3 rounded-xl bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-400/40 transition-all group text-left cursor-pointer">
-                                    <div class="w-9 h-9 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-200 font-bold text-xs shrink-0 group-hover:scale-105 transition-transform">
-                                        EM
-                                    </div>
+                                <!-- Faculty (Prof. Edsan Moreno) -->
+                                <a href="dev_login.php?email=edsan.moreno@navotaspolytechniccollege.edu.ph" class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-400/40 transition-all text-left group cursor-pointer">
+                                    <div class="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-200 font-bold text-xs shrink-0 group-hover:scale-105 transition-transform">EM</div>
                                     <div class="min-w-0 flex-1">
-                                        <p class="text-xs font-bold text-white truncate group-hover:text-amber-200 transition-colors">MORENO, Edsan</p>
-                                        <p class="text-[10px] text-amber-300/80 font-mono truncate">Faculty · CCS</p>
+                                        <div class="flex items-center justify-between">
+                                            <p class="text-xs font-bold text-white truncate">MORENO, Edsan</p>
+                                        </div>
+                                        <p class="text-[10px] text-amber-300/80 font-mono truncate">Faculty Portal</p>
                                     </div>
+                                    <span class="material-symbols-outlined text-white/30 group-hover:text-amber-300 text-[16px]">arrow_forward</span>
                                 </a>
 
-                                <!-- 2. Administrator -->
-                                <a href="dev_login.php?email=jiloderramas@gmail.com"
-                                   class="flex items-center gap-2.5 p-3 rounded-xl bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-400/40 transition-all group text-left cursor-pointer">
-                                    <img src="https://lh3.googleusercontent.com/a/ACg8ocIxJ4LcSkHu8zIWqYnSFrecxLcgsvm1JT1RqrgVzcMIHrICI-UI=s96-c"
-                                         alt="Admin" class="w-9 h-9 rounded-full object-cover border border-purple-400/50 shrink-0 group-hover:scale-105 transition-transform">
+                                <!-- Administrator -->
+                                <a href="dev_login.php?role=admin" class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-400/40 transition-all text-left group cursor-pointer">
+                                    <div class="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-400/50 flex items-center justify-center text-purple-200 font-bold text-xs shrink-0 group-hover:scale-105 transition-transform">🛡️</div>
                                     <div class="min-w-0 flex-1">
-                                        <p class="text-xs font-bold text-white truncate group-hover:text-purple-200 transition-colors">DERRAMAS, JILO</p>
-                                        <p class="text-[10px] text-purple-300/80 font-mono truncate">Administrator</p>
+                                        <div class="flex items-center justify-between">
+                                            <p class="text-xs font-bold text-white truncate">Administrator</p>
+                                        </div>
+                                        <p class="text-[10px] text-purple-300/80 font-mono truncate">Admin Portal</p>
                                     </div>
+                                    <span class="material-symbols-outlined text-white/30 group-hover:text-purple-300 text-[16px]">arrow_forward</span>
                                 </a>
                             </div>
                         </div>
 
-                        <!-- Optional: Collapsible Other Student ID -->
-                        <div class="mt-4 pt-3 border-t border-white/5 text-center">
-                            <button type="button" onclick="document.getElementById('manual-login-panel').classList.toggle('hidden')"
-                                class="text-[11px] text-emerald-300/70 hover:text-emerald-200 font-mono transition-colors inline-flex items-center gap-1 cursor-pointer">
-                                <span class="material-symbols-outlined text-[13px]">swap_horiz</span>
-                                Sign in with another Student ID
-                            </button>
-
-                            <div id="manual-login-panel" class="hidden mt-3 text-left">
-                                <form method="POST" action="login.php" class="flex gap-2">
-                                    <input type="text" name="identifier" placeholder="Enter Student ID or Email" required
-                                        class="flex-1 bg-black/35 border border-emerald-500/30 focus:border-emerald-400 text-white placeholder-emerald-100/40 text-xs rounded-xl px-3 py-2 outline-none">
-                                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl transition-all cursor-pointer">
-                                        Go
-                                    </button>
-                                </form>
-                            </div>
+                        <!-- Loading overlay shown during Google verification -->
+                        <div id="npc-login-loading" class="fixed inset-0 hidden items-center justify-center flex-col gap-3 z-50"
+                            style="background:rgba(0,23,54,0.78);backdrop-filter:blur(8px);">
+                            <span class="material-symbols-outlined text-amber-300 text-[38px] animate-spin">progress_activity</span>
+                            <p class="text-white font-semibold text-sm" id="loading-text">Connecting to Google Authentication…</p>
+                            <p class="text-white/60 text-xs font-mono">Verifying institutional credentials...</p>
                         </div>
 
                     </div>
@@ -521,12 +513,135 @@ $jsConfig = getJsConfig();
 
         <!-- Footer strip -->
         <footer class="absolute bottom-0 inset-x-0 py-3 text-center">
-            <p class="text-[11px] text-white/40 font-mono tracking-wide">© <?= date('Y') ?> Navotas Polytechnic College · Secure Local Academic Gateway</p>
+            <p class="text-[11px] text-white/40 font-mono tracking-wide">© <?= date('Y') ?> Navotas Polytechnic College · Direct Google Authentication</p>
         </footer>
     </div>
 
-    <!-- Live Profile & Client Script (No external Supabase dependency) -->
+    <!-- Direct Google Identity Services Authentication (Zero Supabase) -->
     <script>
+        const googleClientId = <?= json_encode($jsConfig['google_client_id']) ?>;
+        const overlay = document.getElementById('npc-login-loading');
+        const loadingText = document.getElementById('loading-text');
+
+        function showLoading(msg) {
+            if (overlay) {
+                if (loadingText) loadingText.textContent = msg || 'Connecting to Google Authentication…';
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            }
+        }
+
+        function hideLoading() {
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+        }
+
+        function showAlert(msg, isError = true) {
+            const alertBox = document.getElementById('auth-alert');
+            if (alertBox) {
+                alertBox.className = isError 
+                    ? 'text-xs font-semibold text-rose-200 bg-rose-950/70 border border-rose-500/40 rounded-xl px-3.5 py-3 flex items-center gap-2 mb-4'
+                    : 'text-xs font-semibold text-emerald-200 bg-emerald-950/70 border border-emerald-500/40 rounded-xl px-3.5 py-3 flex items-center gap-2 mb-4';
+                alertBox.innerHTML = '<span class="material-symbols-outlined text-[18px] shrink-0">' + (isError ? 'error' : 'check_circle') + '</span><span>' + msg + '</span>';
+                alertBox.classList.remove('hidden');
+            } else {
+                alert(msg);
+            }
+        }
+
+        // ── Direct Google Credential Response Handler (Calls /set_session.php directly) ──
+        async function handleDirectGoogleLogin(response) {
+            if (!response || !response.credential) {
+                hideLoading();
+                showAlert('No Google credential received. Please try again.');
+                return;
+            }
+
+            showLoading('Authenticating with NPC database…');
+
+            try {
+                const res = await fetch('/set_session.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        credential: response.credential
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showLoading('Welcome, ' + (data.name || 'User') + '! Opening portal…');
+                    window.location.href = data.redirect || '/student/index.php';
+                } else {
+                    hideLoading();
+                    showAlert(data.message || 'Authentication failed. Please contact your campus Administrator or Registrar.');
+                }
+            } catch (e) {
+                hideLoading();
+                showAlert('Network error while creating session. Please try again.');
+            }
+        }
+
+        // Trigger Google GSI One-Tap / Account Chooser
+        function triggerGoogleSignIn() {
+            showLoading('Opening Google Account Chooser…');
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+                try {
+                    window.google.accounts.id.prompt((notification) => {
+                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                            hideLoading();
+                            // If prompt was skipped or not displayed, click the native rendered button
+                            const nativeBtn = document.querySelector('#google-gsi-anchor div[role="button"]');
+                            if (nativeBtn) nativeBtn.click();
+                        }
+                    });
+                    setTimeout(() => {
+                        hideLoading();
+                    }, 4000);
+                    return;
+                } catch (e) {
+                    console.warn('[GSI Prompt Notice]', e);
+                }
+            }
+            hideLoading();
+            showAlert('Google Authentication is initializing. Please wait a moment and try clicking again.');
+        }
+
+        window.addEventListener('load', function() {
+            if (googleClientId && window.google && window.google.accounts && window.google.accounts.id) {
+                try {
+                    window.google.accounts.id.initialize({
+                        client_id: googleClientId,
+                        callback: handleDirectGoogleLogin,
+                        auto_select: false,
+                        cancel_on_tap_outside: true
+                    });
+
+                    // Render native official Google button into anchor
+                    const anchor = document.getElementById('google-gsi-anchor');
+                    const customBtn = document.getElementById('google-login-btn');
+                    if (anchor) {
+                        window.google.accounts.id.renderButton(
+                            anchor,
+                            { theme: 'outline', size: 'large', width: 340, text: 'signin_with', shape: 'pill', logo_alignment: 'left' }
+                        );
+                        // Hide fallback button to keep a single prominent Google button
+                        if (customBtn) customBtn.classList.add('hidden');
+                    }
+
+                    // Auto prompt device Google accounts
+                    window.google.accounts.id.prompt();
+                } catch (e) {
+                    console.warn('[Google GSI Notice]', e);
+                }
+            }
+        });
+
         // Initialize Cinematic 3D Login Hero Scene
         document.addEventListener('DOMContentLoaded', function() {
             if (window.npcThree && typeof window.npcThree.initLoginHero === 'function') {

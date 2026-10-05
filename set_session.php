@@ -14,6 +14,7 @@
  */
 
 require_once __DIR__ . '/includes/supabase_helper.php';
+require_once __DIR__ . '/includes/auth.php';
 
 // ─── Session Hardening ─────────────────────────────────────────────────────────
 ini_set('session.cookie_httponly', '1');
@@ -40,14 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // ─── Parse Request ─────────────────────────────────────────────────────────────
 $data = json_decode(file_get_contents("php://input"), true);
+$accessToken = trim($data['credential'] ?? $data['id_token'] ?? $data['access_token'] ?? '');
 
-if (!isset($data['access_token']) || empty(trim($data['access_token']))) {
+if (empty($accessToken)) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Missing access token']);
+    echo json_encode(['success' => false, 'message' => 'Missing authentication credential']);
     exit();
 }
-
-$accessToken = trim($data['access_token']);
 
 // ─── Step 1: Verify Token Server-Side ──────────────────────────────────────────
 $user = verifySupabaseToken($accessToken);
@@ -200,9 +200,13 @@ if (!empty($avatarUrl) && (empty($existingUser['avatar_url']) || $avatarUrl !== 
 // ─── Step 5: Create Hardened PHP Session ──────────────────────────────────────
 session_regenerate_id(true);
 
+$formattedName = formatLastNameFirst($finalName);
+$dest = ($role === 'admin' || $role === 'registrar') ? '/admin/index.php' : (($role === 'teacher' || $role === 'faculty') ? '/teacher/index.php' : '/student/index.php');
+
 $_SESSION['user_id'] = $existingUser['id'];
 $_SESSION['email'] = $existingUser['email'];
-$_SESSION['name'] = $finalName;
+$_SESSION['name'] = $formattedName;
+$_SESSION['raw_name'] = $finalName;
 $_SESSION['picture'] = !empty($existingUser['avatar_url']) ? $existingUser['avatar_url'] : $avatarUrl;
 $_SESSION['avatar'] = $_SESSION['picture'];
 $_SESSION['role'] = $role;
@@ -221,12 +225,14 @@ $_SESSION['ip_address'] = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 getCsrfToken();
 
 // ─── Step 7: Log Successful Login ──────────────────────────────────────────────
-logSecurityEvent("LOGIN_SUCCESS: $email logged in as $role", $email, 'Low');
+logSecurityEvent("LOGIN_SUCCESS: $email logged in as $role ($formattedName)", $email, 'Low');
 
 http_response_code(200);
 echo json_encode([
     'success' => true,
     'role' => $role,
+    'redirect' => $dest,
+    'name' => $formattedName,
     'csrf_token' => $_SESSION['csrf_token']
 ]);
 ?>
