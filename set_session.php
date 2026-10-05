@@ -2,61 +2,67 @@
 /**
  * set_session.php — Secure Server-Side Session Creator
  * 
- * ACCEPTS ONLY: { "access_token": "eyJ..." }
+ * ACCEPTS: { "credential": "eyJ..." } or { "access_token": "eyJ..." }
  * 
  * Flow:
- *  1. Receives the Supabase access_token from the browser
- *  2. Verifies it server-side via Supabase Auth API
- *  3. Looks up the user's role from the users table (service key)
+ *  1. Receives Google credential / ID token directly
+ *  2. Verifies token server-side (decodes Google JWT and extracts verified email)
+ *  3. Looks up the verified user in the MySQL users table
  *  4. Creates a hardened PHP session with VERIFIED data only
- * 
- * NEVER trusts role, name, or user_id from the browser.
  */
+
+// Buffer output and suppress HTML error printing in API responses
+ob_start();
+ini_set('display_errors', '0');
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+
+// ─── Session Hardening ─────────────────────────────────────────────────────────
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.cookie_samesite', 'Lax');
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+
+    if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') 
+        || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')) {
+        ini_set('session.cookie_secure', '1');
+    }
+    session_start();
+}
 
 require_once __DIR__ . '/includes/supabase_helper.php';
 require_once __DIR__ . '/includes/auth.php';
 
-// ─── Session Hardening ─────────────────────────────────────────────────────────
-ini_set('session.cookie_httponly', '1');
-ini_set('session.cookie_samesite', 'Lax');
-ini_set('session.use_strict_mode', '1');
-ini_set('session.use_only_cookies', '1');
-
-// Enable secure cookies when on HTTPS
-if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') 
-    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')) {
-    ini_set('session.cookie_secure', '1');
+function sendJsonResponse(int $code, array $payload): void {
+    if (ob_get_length()) {
+        ob_clean();
+    }
+    http_response_code($code);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($payload);
+    exit();
 }
-
-session_start();
-
-header('Content-Type: application/json');
 
 // ─── Only accept POST ──────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Method not allowed']);
-    exit();
+    sendJsonResponse(405, ['success' => false, 'message' => 'Method not allowed']);
 }
 
 // ─── Parse Request ─────────────────────────────────────────────────────────────
-$data = json_decode(file_get_contents("php://input"), true);
+$rawInput = file_get_contents("php://input");
+$data = json_decode($rawInput, true);
 $accessToken = trim($data['credential'] ?? $data['id_token'] ?? $data['access_token'] ?? '');
 
 if (empty($accessToken)) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Missing authentication credential']);
-    exit();
+    sendJsonResponse(400, ['success' => false, 'message' => 'Missing authentication credential']);
 }
 
 // ─── Step 1: Verify Token Server-Side ──────────────────────────────────────────
 $user = verifySupabaseToken($accessToken);
 
 if (!$user) {
-    http_response_code(401);
     logSecurityEvent('AUTH_FAIL: Invalid or expired token presented', '', 'Medium');
-    echo json_encode(['success' => false, 'message' => 'Invalid or expired authentication token']);
-    exit();
+    sendJsonResponse(401, ['success' => false, 'message' => 'Invalid or expired authentication token']);
 }
 
 $email = strtolower(trim($user['email']));
@@ -83,13 +89,11 @@ $userStmt->execute([$email]);
 $existingUser = $userStmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$existingUser) {
-    http_response_code(403);
     logSecurityEvent("AUTH_DENIED: Unregistered account attempted login: $email", $email, 'High');
-    echo json_encode([
+    sendJsonResponse(403, [
         'success' => false,
         'message' => 'Account not found in the NPC database. Please contact your campus Administrator or Registrar to register your account.'
     ]);
-    exit();
 }
 
 // ─── Step 3: Account Status Check (Active, Banned, Restricted, Snoozed) ───────
@@ -97,33 +101,27 @@ $userStatus = $existingUser['status'] ?? ($existingUser['is_active'] ? 'Active' 
 $isActive = (int)($existingUser['is_active'] ?? 1);
 
 if ($userStatus === 'Banned') {
-    http_response_code(403);
     logSecurityEvent("AUTH_DENIED: Banned account attempted login: $email", $email, 'High');
-    echo json_encode([
+    sendJsonResponse(403, [
         'success' => false,
         'message' => 'This account has been banned by the Administrator. Access denied.'
     ]);
-    exit();
 }
 
 if ($userStatus === 'Restricted') {
-    http_response_code(403);
     logSecurityEvent("AUTH_DENIED: Restricted account attempted login: $email", $email, 'High');
-    echo json_encode([
+    sendJsonResponse(403, [
         'success' => false,
         'message' => 'This account has been restricted by the Administrator. Access denied.'
     ]);
-    exit();
 }
 
 if ($userStatus === 'Snoozed' || $isActive === 0) {
-    http_response_code(403);
     logSecurityEvent("AUTH_DENIED: Snoozed/Inactive account attempted login: $email", $email, 'High');
-    echo json_encode([
+    sendJsonResponse(403, [
         'success' => false,
         'message' => 'This account is currently snoozed/deactivated. Please contact the Administrator.'
     ]);
-    exit();
 }
 
 // ─── Step 4: Resolve Profile & Role from Database Record ─────────────────────
@@ -201,7 +199,9 @@ if (!empty($avatarUrl) && (empty($existingUser['avatar_url']) || $avatarUrl !== 
 session_regenerate_id(true);
 
 $formattedName = formatLastNameFirst($finalName);
-$dest = ($role === 'admin' || $role === 'registrar') ? '/admin/index.php' : (($role === 'teacher' || $role === 'faculty') ? '/teacher/index.php' : '/student/index.php');
+$baseDir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
+$portalPath = ($role === 'admin' || $role === 'registrar') ? '/admin/index.php' : (($role === 'teacher' || $role === 'faculty') ? '/teacher/index.php' : '/student/index.php');
+$dest = ($baseDir === '' || $baseDir === '/') ? $portalPath : ($baseDir . $portalPath);
 
 $_SESSION['user_id'] = $existingUser['id'];
 $_SESSION['email'] = $existingUser['email'];
@@ -227,8 +227,7 @@ getCsrfToken();
 // ─── Step 7: Log Successful Login ──────────────────────────────────────────────
 logSecurityEvent("LOGIN_SUCCESS: $email logged in as $role ($formattedName)", $email, 'Low');
 
-http_response_code(200);
-echo json_encode([
+sendJsonResponse(200, [
     'success' => true,
     'role' => $role,
     'redirect' => $dest,

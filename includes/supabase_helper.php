@@ -506,10 +506,12 @@ function verifySupabaseToken(string $accessToken): ?array {
                     return [
                         'id' => $payload['sub'] ?? ('usr-jwt-' . substr(md5($extractedEmail), 0, 10)),
                         'email' => $extractedEmail,
+                        'picture' => $avatar,
                         'user_metadata' => [
                             'full_name' => $name,
                             'name' => $name,
-                            'avatar_url' => $avatar
+                            'avatar_url' => $avatar,
+                            'picture' => $avatar
                         ]
                     ];
                 }
@@ -517,11 +519,12 @@ function verifySupabaseToken(string $accessToken): ?array {
         }
     }
 
-    // 3. Check Google tokeninfo API (if it's an access token or OAuth token)
+    // 3. Check Google tokeninfo API (supports both access_token and id_token)
     try {
-        $ch = curl_init("https://oauth2.googleapis.com/tokeninfo?access_token=" . urlencode($accessToken));
+        $tokenParam = (substr_count($accessToken, '.') === 2) ? "id_token=" : "access_token=";
+        $ch = curl_init("https://oauth2.googleapis.com/tokeninfo?" . $tokenParam . urlencode($accessToken));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 4);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $resp = curl_exec($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -529,12 +532,18 @@ function verifySupabaseToken(string $accessToken): ?array {
         if ($status === 200 && !empty($resp)) {
             $info = json_decode($resp, true);
             if (!empty($info['email'])) {
+                $email = strtolower($info['email']);
+                $name = $info['name'] ?? explode('@', $email)[0];
+                $pic = $info['picture'] ?? null;
                 return [
-                    'id' => 'usr-google-' . ($info['sub'] ?? substr(md5($info['email']), 0, 10)),
-                    'email' => strtolower($info['email']),
+                    'id' => 'usr-google-' . ($info['sub'] ?? substr(md5($email), 0, 10)),
+                    'email' => $email,
+                    'picture' => $pic,
                     'user_metadata' => [
-                        'full_name' => $info['name'] ?? explode('@', $info['email'])[0],
-                        'name' => $info['name'] ?? explode('@', $info['email'])[0]
+                        'full_name' => $name,
+                        'name' => $name,
+                        'avatar_url' => $pic,
+                        'picture' => $pic
                     ]
                 ];
             }

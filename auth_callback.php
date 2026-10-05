@@ -324,7 +324,8 @@ $jsConfig = getJsConfig();
                 setStatus('Verifying Token...', 'Establishing secure encrypted handshake with server...', false, '', 60);
                 if (techIndicator) techIndicator.innerText = 'SESSION: SIGNING';
 
-                const res = await fetch('/set_session.php', {
+                const sessionEndpoint = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1) + 'set_session.php';
+                const res = await fetch(sessionEndpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ access_token: accessToken })

@@ -551,7 +551,7 @@ $jsConfig = getJsConfig();
             }
         }
 
-        // ── Direct Google Credential Response Handler (Calls /set_session.php directly) ──
+        // ── Direct Google Credential Response Handler (Calls set_session.php directly) ──
         async function handleDirectGoogleLogin(response) {
             if (!response || !response.credential) {
                 hideLoading();
@@ -562,7 +562,8 @@ $jsConfig = getJsConfig();
             showLoading('Authenticating with NPC database…');
 
             try {
-                const res = await fetch('/set_session.php', {
+                const sessionEndpoint = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1) + 'set_session.php';
+                const res = await fetch(sessionEndpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -572,18 +573,28 @@ $jsConfig = getJsConfig();
                     })
                 });
 
-                const data = await res.json();
+                const text = await res.text();
+                let data = null;
+                try {
+                    data = JSON.parse(text);
+                } catch (jsonErr) {
+                    console.error('[Session Error]', text);
+                    hideLoading();
+                    showAlert('Server returned invalid response: ' + (text.substring(0, 120) || 'Check server logs'));
+                    return;
+                }
 
                 if (data.success) {
                     showLoading('Welcome, ' + (data.name || 'User') + '! Opening portal…');
-                    window.location.href = data.redirect || '/student/index.php';
+                    window.location.href = data.redirect || 'student/index.php';
                 } else {
                     hideLoading();
                     showAlert(data.message || 'Authentication failed. Please contact your campus Administrator or Registrar.');
                 }
             } catch (e) {
                 hideLoading();
-                showAlert('Network error while creating session. Please try again.');
+                console.error('[Auth Exception]', e);
+                showAlert('Network error: ' + (e.message || 'Please check your connection and try again.'));
             }
         }
 
