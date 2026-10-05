@@ -14,7 +14,7 @@
  *  - Every call is logged to ai_tool_logs via aiLogTool().
  */
 
-require_once __DIR__ . '/supabase_helper.php';
+require_once __DIR__ . '/db_helper.php';
 
 if (!function_exists('facultyOwnsClass')) {
     // Local fallback matching api_faculty.php semantics (avoid cross-file include order issues)

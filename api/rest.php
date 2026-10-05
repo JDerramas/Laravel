@@ -9,7 +9,7 @@ header('Content-Type: application/json');
 header('Cache-Control: no-store');
 
 require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/supabase_helper.php';
+require_once __DIR__ . '/../includes/db_helper.php';
 
 $table = $_GET['table'] ?? '';
 if (empty($table)) {

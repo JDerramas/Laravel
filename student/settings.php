@@ -9,7 +9,7 @@ $full_name = $is_logged_in ? (string)$_SESSION['name'] : 'Guest User';
 $user_id_display = $is_logged_in && isset($_SESSION['student_number']) ? (string)$_SESSION['student_number'] : 'GUEST';
 // CSRF token for the Profile Update Request API
 if (!function_exists('getCsrfToken')) {
-    require_once __DIR__ . '/../includes/supabase_helper.php';
+    require_once __DIR__ . '/../includes/db_helper.php';
 }
 $npc_csrf = getCsrfToken();
 ?>

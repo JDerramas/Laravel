@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/db.php';
-require_once __DIR__ . '/../includes/supabase_helper.php';
+require_once __DIR__ . '/../includes/db_helper.php';
 
 echo "=== 1. Testing getJsConfig() ===\n";
 $config = getJsConfig();

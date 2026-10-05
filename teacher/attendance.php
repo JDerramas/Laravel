@@ -104,7 +104,7 @@ $csrf_token = getCsrfToken();
     </script>
     <!-- QRCode.js library for 100% reliable local client-side QR generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script id="npc-role-meta" type="application/json">
         <?= json_encode(['role' => $_SESSION['role'] ?? 'student', 'email' => $_SESSION['email'] ?? '', 'name' => $_SESSION['name'] ?? '']) ?>
     </script>

@@ -16,7 +16,7 @@
  * or import into Supabase Table Editor. Manifest lists row counts.
  */
 
-require_once __DIR__ . '/supabase_helper.php';
+require_once __DIR__ . '/db_helper.php';
 
 $isCli = PHP_SAPI === 'cli';
 

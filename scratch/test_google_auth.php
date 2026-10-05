@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../includes/supabase_helper.php';
+require_once __DIR__ . '/../includes/db_helper.php';
 
 // Create a local Google Auth handshake token for Lovi Student
 $tokenPayload = json_encode([

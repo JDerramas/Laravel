@@ -9,7 +9,7 @@
  * 5. Seeds the official schedule for AIS 2B into `classes` table
  */
 
-require_once __DIR__ . '/../includes/supabase_helper.php';
+require_once __DIR__ . '/../includes/db_helper.php';
 
 $db = getDB();
 

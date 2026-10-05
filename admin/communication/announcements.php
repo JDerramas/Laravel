@@ -100,7 +100,7 @@ $csrf_token = getCsrfToken();
             }
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
 
     <style>
         /* Google Docs Canvas Styling */

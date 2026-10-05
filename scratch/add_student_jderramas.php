@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__DIR__) . '/includes/supabase_helper.php';
+require_once dirname(__DIR__) . '/includes/db_helper.php';
 $db = getDB();
 
 $db->exec("INSERT INTO students (user_id, student_number, full_name, email, program, section, year_level, status, scholar_status) 

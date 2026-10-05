@@ -10,7 +10,7 @@
  *  - Conversations are NOT deleted (persisted for audit and user history).
  */
 
-require_once __DIR__ . '/supabase_helper.php';
+require_once __DIR__ . '/db_helper.php';
 
 function getAiViolationsFile(): string {
     $dir = dirname(__DIR__) . '/backend';

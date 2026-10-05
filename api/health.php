@@ -21,7 +21,7 @@ $checks['php'] = ['status' => 'ok', 'version' => PHP_VERSION];
 
 // Database
 try {
-    require_once __DIR__ . '/../includes/supabase_helper.php';
+    require_once __DIR__ . '/../includes/db_helper.php';
     $r = supabaseServiceQuery('/rest/v1/users?select=id&limit=1');
     $checks['database'] = ['status' => ($r['status'] === 200 ? 'ok' : 'degraded'), 'http' => $r['status']];
 } catch (Throwable $e) {
@@ -29,7 +29,7 @@ try {
 }
 
 // AI subsystem
-require_once __DIR__ . '/../includes/supabase_helper.php';
+require_once __DIR__ . '/../includes/db_helper.php';
 $env = function_exists('loadEnv') ? loadEnv() : [];
 $aiKeyPresent = !empty($env['OPENROUTER_API_KEY']) || !empty(getenv('OPENROUTER_API_KEY'));
 $scriptPresent = is_file(dirname(__DIR__) . '/backend/query_ai.py') || is_file(dirname(__DIR__) . '/query_ai.py') || is_file(__DIR__ . '/query_ai.py');

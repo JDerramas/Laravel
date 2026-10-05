@@ -97,7 +97,7 @@ $csrf_token = getCsrfToken();
             }
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <link rel="stylesheet" href="/assets/css/styles.css">
     <!-- Three.js 3D Engine & NPC 3D Visuals -->
     <script src="/assets/js/three.min.js"></script>

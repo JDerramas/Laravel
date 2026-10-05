@@ -16,7 +16,7 @@ $currentScript = basename($_SERVER['SCRIPT_FILENAME'] ?? '');
 $isDirectApiCall = ($currentScript === 'elms.php' || $currentScript === 'lms.php' || basename($_SERVER['PHP_SELF'] ?? '') === 'elms.php' || basename($_SERVER['PHP_SELF'] ?? '') === 'lms.php' || defined('ELMS_API_EXECUTE') || defined('LMS_API_EXECUTE'));
 
 require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/supabase_helper.php';
+require_once __DIR__ . '/../includes/db_helper.php';
 
 if ($isDirectApiCall) {
     $preAction = $_GET['action'] ?? $_POST['action'] ?? '';
@@ -205,7 +205,7 @@ function registerStudentLivePresenceJoin(string $sessionCode, string $courseCode
 
     // Sync official attendance record to Supabase
     $refId = 'REF-PNM-' . date('Ymd') . '-' . strtoupper(substr(md5($sessionCode . $stNum), 0, 6));
-    require_once __DIR__ . '/../includes/supabase_helper.php';
+    require_once __DIR__ . '/../includes/db_helper.php';
     
     // Check if record exists in attendance_records
     $recCheck = supabaseServiceQuery(
@@ -1224,7 +1224,7 @@ if ($action === 'toggle_live_class') {
                 }
 
                 // Synchronize with Supabase attendance_sessions
-                require_once __DIR__ . '/../includes/supabase_helper.php';
+                require_once __DIR__ . '/../includes/db_helper.php';
                 supabaseServiceQuery("/rest/v1/attendance_sessions", 'POST', [[
                     'session_code'         => $sessionCode,
                     'class_code'           => $c['code'],
@@ -1260,7 +1260,7 @@ if ($action === 'toggle_live_class') {
                 }
 
                 // Synchronize with Supabase
-                require_once __DIR__ . '/../includes/supabase_helper.php';
+                require_once __DIR__ . '/../includes/db_helper.php';
                 supabaseServiceQuery(
                     "/rest/v1/attendance_sessions?session_code=eq." . rawurlencode($c['live_session']['session_code'] ?? $sessionCode),
                     'PATCH',
@@ -1317,7 +1317,7 @@ if ($action === 'update_live_meeting_link') {
             $c['meeting_link'] = $meetingLink;
             if (isset($c['live_session']) && !empty($c['live_session']['is_active'])) {
                 $c['live_session']['meeting_link'] = $meetingLink;
-                require_once __DIR__ . '/../includes/supabase_helper.php';
+                require_once __DIR__ . '/../includes/db_helper.php';
                 if (!empty($c['live_session']['session_code'])) {
                     supabaseServiceQuery(
                         "/rest/v1/attendance_sessions?session_code=eq." . rawurlencode($c['live_session']['session_code']),
@@ -1480,7 +1480,7 @@ if ($action === 'toggle_live_attendance_lock') {
             if (isset($c['live_session'])) {
                 $c['live_session']['is_attendance_locked'] = $locked;
                 if (!empty($c['live_session']['session_code'])) {
-                    require_once __DIR__ . '/../includes/supabase_helper.php';
+                    require_once __DIR__ . '/../includes/db_helper.php';
                     supabaseServiceQuery(
                         "/rest/v1/attendance_sessions?session_code=eq." . rawurlencode($c['live_session']['session_code']),
                         'PATCH',
@@ -1528,7 +1528,7 @@ if ($action === 'extend_live_grace_period') {
                 $resTimes = ['present_until' => $newPres, 'late_until' => $newLate];
 
                 if (!empty($c['live_session']['session_code'])) {
-                    require_once __DIR__ . '/../includes/supabase_helper.php';
+                    require_once __DIR__ . '/../includes/db_helper.php';
                     supabaseServiceQuery(
                         "/rest/v1/attendance_sessions?session_code=eq." . rawurlencode($c['live_session']['session_code']),
                         'PATCH',
@@ -1809,7 +1809,7 @@ if ($action === 'get_live_presence_roster') {
     }
 
     // Resolve enrolled students from users table where role = 'student' (cached 60s for speed)
-    require_once __DIR__ . '/../includes/supabase_helper.php';
+    require_once __DIR__ . '/../includes/db_helper.php';
     $cacheFile = sys_get_temp_dir() . '/npc_students_cache.json';
     $allStudents = null;
     if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < 60) {

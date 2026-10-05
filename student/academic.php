@@ -111,7 +111,7 @@ $jsConfig = getJsConfig();
             }
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         @media print {
             @page { size: portrait; margin: 12mm 15mm; }

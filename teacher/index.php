@@ -101,7 +101,7 @@ $jsConfig = getJsConfig();
             }
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <!-- Three.js 3D Engine & NPC 3D Visuals -->
     <script src="/assets/js/three.min.js"></script>
     <script>

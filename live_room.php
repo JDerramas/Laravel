@@ -29,7 +29,7 @@ if (empty($userEmail)) {
     exit;
 }
 
-require_once __DIR__ . '/includes/supabase_helper.php';
+require_once __DIR__ . '/includes/db_helper.php';
 $env = loadEnv();
 $liveEngine = $_GET['engine'] ?? $env['LIVE_ROOM_ENGINE'] ?? 'plugnmeet';
 if ($liveEngine === 'livekit') {

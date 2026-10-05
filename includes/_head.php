@@ -134,8 +134,8 @@ $__userName = $_SESSION['name'] ?? '';
     <!-- NPC UX Engine v2: count-up, ring charts, reveals, ripples, confetti, Ctrl+K palette -->
     <script src="/assets/js/npc.js?v=<?= file_exists(dirname(__DIR__) . '/assets/js/npc.js') ? filemtime(dirname(__DIR__) . '/assets/js/npc.js') : '1' ?>"></script>
 
-    <!-- Local MySQL Supabase Drop-In Client (Zero Cloud Dependency) -->
-    <script src="/assets/js/local-supabase.js?v=<?= file_exists(dirname(__DIR__) . '/assets/js/local-supabase.js') ? filemtime(dirname(__DIR__) . '/assets/js/local-supabase.js') : '1' ?>"></script>
+    <!-- Local MySQL Client (Zero Cloud Dependency) -->
+    <script src="/assets/js/local-db.js?v=<?= file_exists(dirname(__DIR__) . '/assets/js/local-db.js') ? filemtime(dirname(__DIR__) . '/assets/js/local-db.js') : '1' ?>"></script>
 
     <script>
         // ── CSRF token for API calls ────────────────────────────────────────────

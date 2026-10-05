@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__DIR__) . '/includes/supabase_helper.php';
+require_once dirname(__DIR__) . '/includes/db_helper.php';
 $db = getDB();
 
 echo "=== ALL STUDENTS ===\n";

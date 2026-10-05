@@ -51,7 +51,7 @@ $jsConfig = getJsConfig();
     <script src="/assets/js/npc.js"></script>
 
     <!-- Official Supabase JS SDK for OAuth Handling -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
 
     <style>
         /* 3D Canvas Background */

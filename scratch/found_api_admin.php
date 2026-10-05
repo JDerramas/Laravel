@@ -56,7 +56,7 @@ $csrf_token = getCsrfToken();
             }
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
 </head>
 
 <body class="bg-surface text-on-surface font-sans min-h-screen flex antialiased">
